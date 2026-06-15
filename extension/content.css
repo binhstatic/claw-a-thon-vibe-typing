@@ -189,6 +189,28 @@
   line-height: 1.6;
 }
 
+/* ── Loading state ── */
+.vt-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 14px;
+  color: #6b7280;
+  font-size: 12.5px;
+}
+
+.vt-spinner {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #7c3aed;
+  border-radius: 50%;
+  animation: vt-spin 0.7s linear infinite;
+}
+
+@keyframes vt-spin { to { transform: rotate(360deg); } }
+
 /* ── Mirror div (hidden, used for caret position) ── */
 #vt-mirror {
   position: absolute !important;

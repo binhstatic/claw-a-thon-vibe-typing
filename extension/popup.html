@@ -87,6 +87,20 @@
       text-align: center;
       border-top: 1px solid #f3f4f6;
     }
+    .server-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 4px;
+      font-size: 10.5px;
+    }
+    .server-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #d1d5db;
+    }
+    .server-dot.online  { background: #4ade80; }
+    .server-dot.offline { background: #f87171; }
   </style>
 </head>
 <body>
@@ -127,7 +141,34 @@
     <br/><br/>Dùng <strong>dấu chấm (.)</strong> để kết thúc cụm muốn gợi ý.
   </div>
 
-  <div class="footer">Dữ liệu mẫu · Sắp tích hợp AI dịch thật</div>
+  <div class="footer">
+    Powered by <strong>OpenClaw</strong>
+    <br>
+    <div class="server-status">
+      <div class="server-dot" id="server-dot"></div>
+      <span id="server-label">Đang kiểm tra server...</span>
+    </div>
+  </div>
+
+  <script>
+    async function checkServer() {
+      const dot   = document.getElementById('server-dot');
+      const label = document.getElementById('server-label');
+      try {
+        const res = await fetch('https://hidden-endpoint.nhatbs/health', { signal: AbortSignal.timeout(4000) });
+        if (res.ok) {
+          dot.className = 'server-dot online';
+          label.textContent = 'Agent server: online';
+        } else {
+          throw new Error();
+        }
+      } catch (_) {
+        dot.className = 'server-dot offline';
+        label.textContent = 'Agent server: offline — chạy npm start trong /agent';
+      }
+    }
+    checkServer();
+  </script>
 
 </body>
 </html>
