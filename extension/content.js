@@ -35,6 +35,7 @@
   // For precise caret position, use the mirror-div technique with fallback.
   function getDropdownAnchor(el) {
     try {
+      if (isContentEditableTarget(el)) return getCECaretAnchor();
       return getCaretAnchor(el);
     } catch (_) {
       const r = el.getBoundingClientRect();
@@ -43,6 +44,73 @@
         y: r.bottom + window.scrollY,
       };
     }
+  }
+
+  // ─── CONTENTEDITABLE SUPPORT (Gmail, LinkedIn, Facebook, etc.) ─────────────────
+  function isContentEditableTarget(el) {
+    return !!el && el.isContentEditable &&
+           el.tagName !== 'TEXTAREA' && el.tagName !== 'INPUT';
+  }
+
+  // Walk up to the outermost contenteditable root (LinkedIn nests <p> inside).
+  function getContentEditableRoot(el) {
+    let root = el;
+    while (root.parentElement && root.parentElement.isContentEditable) {
+      root = root.parentElement;
+    }
+    return root;
+  }
+
+  // All editable text before the caret — works when anchor is a text or element node.
+  function getCEContext(root) {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || !sel.isCollapsed) return null;
+    const range = sel.getRangeAt(0);
+    if (!root.contains(range.startContainer)) return null;
+
+    const preRange = document.createRange();
+    preRange.selectNodeContents(root);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    return { textBeforeCaret: preRange.toString() };
+  }
+
+  // Map a flat character offset inside root to a DOM text position.
+  function offsetToPosition(root, offset) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let remaining = offset;
+    let last = null;
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      const len = node.textContent.length;
+      last = node;
+      if (remaining <= len) return { node, offset: remaining };
+      remaining -= len;
+    }
+    if (last) return { node: last, offset: last.textContent.length };
+    return null;
+  }
+
+  function offsetToRange(root, start, end) {
+    const startPos = offsetToPosition(root, start);
+    const endPos   = offsetToPosition(root, end);
+    if (!startPos || !endPos) return null;
+    const range = document.createRange();
+    range.setStart(startPos.node, startPos.offset);
+    range.setEnd(endPos.node, endPos.offset);
+    return range;
+  }
+
+  // Caret position for a contenteditable selection — {x, y} in document coords
+  function getCECaretAnchor() {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) throw new Error('no selection');
+    const range = sel.getRangeAt(0).cloneRange();
+    range.collapse(false);
+    const rect = range.getBoundingClientRect();
+    if (!rect || (!rect.left && !rect.top && !rect.width && !rect.height)) {
+      throw new Error('no caret rect');
+    }
+    return { x: rect.left + window.scrollX, y: rect.bottom + window.scrollY };
   }
 
   // Mirror-div caret position — returns {x, y} in document coordinates
@@ -214,6 +282,7 @@
   // ─── APPLY CHOICE ────────────────────────────────────────────────────────────
   function applyChoice(chosen) {
     if (!currentTarget || !currentMatch) return;
+    if (currentMatch.isCE) { applyChoiceCE(chosen); return; }
     const el = currentTarget;
     const { fullMatch, matchStart } = currentMatch;
     const before = el.value.substring(0, matchStart);
@@ -226,13 +295,50 @@
     removeDropdown();
   }
 
+  function applyChoiceCE(chosen) {
+    const el = currentTarget;
+    const { matchStart, fullMatch } = currentMatch;
+    try {
+      const range = offsetToRange(el, matchStart, matchStart + fullMatch.length);
+      if (!range) throw new Error('could not locate match range');
+
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+
+      // execCommand works reliably in LinkedIn and other rich editors.
+      if (!document.execCommand('insertText', false, chosen)) {
+        range.deleteContents();
+        range.insertNode(document.createTextNode(chosen));
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+
+      el.focus();
+      el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+    } catch (err) {
+      console.warn('[vibe-typing] applyChoiceCE error:', err.message);
+    }
+    removeDropdown();
+  }
+
   // ─── DETECT TRIGGER IN TEXT ───────────────────────────────────────────────────
   async function detect(el) {
-    const val = el.value;
-    if (!val) return;
+    const isCE = isContentEditableTarget(el);
 
-    const caret = typeof el.selectionEnd === 'number' ? el.selectionEnd : val.length;
-    const text  = val.slice(0, caret);
+    let text;
+    if (isCE) {
+      const ce = getCEContext(el);
+      if (!ce) { if (dropdown) removeDropdown(); return; }
+      text = ce.textBeforeCaret;
+    } else {
+      const val = el.value;
+      if (!val) return;
+      const caret = typeof el.selectionEnd === 'number' ? el.selectionEnd : val.length;
+      text  = val.slice(0, caret);
+    }
+    if (!text) { if (dropdown) removeDropdown(); return; }
 
     for (const { re, mode } of TRIGGERS) {
       const m = text.match(re);
@@ -242,7 +348,7 @@
       const phrase     = m[1].trim();
       const matchStart = m.index;
 
-      const before    = val.substring(0, matchStart);
+      const before    = text.substring(0, matchStart);
       const sentStart = Math.max(
         before.lastIndexOf('. ') + 2,
         before.lastIndexOf('? ') + 2,
@@ -250,7 +356,9 @@
         0
       );
       const context = before.substring(sentStart).trim();
-      const match   = { fullMatch, phrase, mode, matchStart, context };
+      const match   = isCE
+        ? { fullMatch, phrase, mode, matchStart, context, isCE: true }
+        : { fullMatch, phrase, mode, matchStart, context, isCE: false };
 
       // Cancel any in-flight request
       if (currentAbortCtrl) currentAbortCtrl.abort();
@@ -277,11 +385,28 @@
   }
 
   // ─── EVENTS (document-level delegation) ──────────────────────────────────────
-  document.addEventListener('input', e => {
-    const el = e.target;
-    if (!isEditable(el)) return;
+  function resolveEditableTarget(el) {
+    if (!el) return null;
+    const tag = el.tagName;
+    if (tag === 'TEXTAREA') return el;
+    if (tag === 'INPUT') {
+      const t = (el.type || 'text').toLowerCase();
+      return (t === 'text' || t === 'search' || t === '') ? el : null;
+    }
+    if (el.isContentEditable) return getContentEditableRoot(el);
+    return null;
+  }
+
+  function handleEditableInput(e) {
+    const el = resolveEditableTarget(e.target);
+    if (!el) return;
     detect(el);
-  }, true); // capture phase — fires before any page handler
+  }
+
+  document.addEventListener('input', handleEditableInput, true);
+  // LinkedIn messaging often updates on keyup/compositionend instead of input.
+  document.addEventListener('keyup', handleEditableInput, true);
+  document.addEventListener('compositionend', handleEditableInput, true);
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && dropdown) {
@@ -295,17 +420,6 @@
   }, true);
 
   document.addEventListener('scroll', () => { if (dropdown) removeDropdown(); }, { passive: true, capture: true });
-
-  function isEditable(el) {
-    if (!el) return false;
-    const tag = el.tagName;
-    if (tag === 'TEXTAREA') return true;
-    if (tag === 'INPUT') {
-      const t = (el.type || 'text').toLowerCase();
-      return t === 'text' || t === 'search' || t === '';
-    }
-    return false;
-  }
 
   // ─── UTIL ─────────────────────────────────────────────────────────────────────
   function esc(s) {
