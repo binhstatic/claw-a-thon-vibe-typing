@@ -93,6 +93,20 @@
     .ex:hover { background: #ede9fe; border-color: #c4b5fd; }
     .ex span { color: #7c3aed; font-weight: 600; }
     .ex-hint { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+    .linkedin-mock {
+      min-height: 80px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1f2937;
+      outline: none;
+      background: #f9fafb;
+    }
+    .linkedin-mock:focus { border-color: #7c3aed; background: #fff; }
+    .linkedin-mock p { margin: 0; }
   </style>
 </head>
 <body>
@@ -128,7 +142,14 @@ Ví dụ: Entering a foreign university can cause students to encounter peer pre
   </div>
 
   <div class="card">
-    <h2>Ví dụ sẵn — click để điền vào ô</h2>
+    <h2>LinkedIn-style chat box (contenteditable)</h2>
+    <div class="msg-form__contenteditable linkedin-mock" contenteditable="true" role="textbox" aria-label="Write a message…" data-placeholder="Write a message…"><p><br></p></div>
+    <p class="hint">
+      Mô phỏng LinkedIn messaging — gõ <code>@cụm tiếng Việt.</code> trong ô trên.
+    </p>
+  </div>
+
+  <div class="card">
     <div class="examples">
       <div class="ex" data-text="Entering a foreign university can cause students to encounter peer pressure, which @dẫn đến tâm lý hoang mang.">
         <span>@dẫn đến tâm lý hoang mang.</span>
@@ -154,6 +175,7 @@ Ví dụ: Entering a foreign university can cause students to encounter peer pre
   </div>
 </div>
 
+<script src="config.js"></script>
 <script src="content.js"></script>
 <script>
   // Fill textarea with example text on click

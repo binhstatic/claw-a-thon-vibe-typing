@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vibe Typing — Trợ lý viết tiếng Anh học thuật</title>
+  <meta name="description" content="Demo Vibe Typing: gõ @cụm., !!từ., #từ. để nhận gợi ý dịch, từ đồng nghĩa và phân tích từ ngay trong lúc viết." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ─── HERO ─────────────────────────────────────────────────────────── -->
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="brand">
+        <span class="brand-mark">🔤</span>
+        <span class="brand-name">Vibe Typing</span>
+        <span class="brand-pill" id="server-pill">
+          <span class="pill-dot" id="server-dot"></span>
+          <span id="server-label">Đang kiểm tra agent…</span>
+        </span>
+      </div>
+      <h1>Viết tiếng Anh học thuật,<br /><span class="grad">gợi ý ngay khi gõ.</span></h1>
+      <p class="hero-sub">
+        Một trợ lý AI cho người Việt học viết tiếng Anh. Gõ một ký hiệu kích hoạt,
+        kết thúc bằng dấu chấm, và nhận gợi ý ngay tại con trỏ — không cần rời khỏi ô soạn thảo.
+      </p>
+      <div class="hero-cta">
+        <a href="#playground" class="btn btn-primary">Dùng thử ngay ↓</a>
+        <a href="#usecases" class="btn btn-ghost">Xem các tình huống</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── USE CASES ────────────────────────────────────────────────────── -->
+  <section class="usecases" id="usecases">
+    <h2 class="section-h">Ba tình huống sử dụng</h2>
+    <p class="section-sub">Mỗi ký hiệu kích hoạt một chế độ. Luôn kết thúc bằng <b>dấu chấm (.)</b> để xác nhận.</p>
+
+    <div class="cards">
+      <article class="card" data-mode="translate">
+        <div class="card-badge">@</div>
+        <h3>Dịch theo ngữ cảnh</h3>
+        <p>Gõ <code>@cụm tiếng Việt.</code> để nhận <b>3 cách diễn đạt tiếng Anh</b> phù hợp với câu đang viết.</p>
+        <div class="card-eg">
+          <span class="eg-in">…this policy <b>@dẫn đến tâm lý hoang mang.</b></span>
+          <span class="eg-out">→ “leads to widespread anxiety”, “gives rise to public confusion”…</span>
+        </div>
+        <button class="card-try" data-try="translate">Thử trong playground →</button>
+      </article>
+
+      <article class="card" data-mode="synonyms">
+        <div class="card-badge">!!</div>
+        <h3>Từ đồng nghĩa</h3>
+        <p>Gõ <code>!!từ tiếng Anh.</code> để nhận <b>4 từ đồng nghĩa</b> dùng được trong văn học thuật.</p>
+        <div class="card-eg">
+          <span class="eg-in">This is a very <b>!!important.</b> issue</span>
+          <span class="eg-out">→ “crucial”, “significant”, “vital”, “paramount”…</span>
+        </div>
+        <button class="card-try" data-try="synonyms">Thử trong playground →</button>
+      </article>
+
+      <article class="card" data-mode="analyze">
+        <div class="card-badge">#</div>
+        <h3>Phân tích từ vựng</h3>
+        <p>Gõ <code>#từ.</code> để xem <b>phát âm, từ loại, collocation và thành ngữ</b> liên quan.</p>
+        <div class="card-eg">
+          <span class="eg-in"><b>#impact.</b></span>
+          <span class="eg-out">→ impact /ˈɪmpækt/ (n), “have an impact on”, impactful (adj)…</span>
+        </div>
+        <button class="card-try" data-try="analyze">Thử trong playground →</button>
+      </article>
+    </div>
+  </section>
+
+  <!-- ─── PLAYGROUND ───────────────────────────────────────────────────── -->
+  <section class="playground" id="playground">
+    <div class="pg-head">
+      <h2 class="section-h">Playground</h2>
+      <p class="section-sub">Gõ trực tiếp như trong tiện ích thật. Bắt đầu nhanh bằng một ví dụ bên dưới.</p>
+    </div>
+
+    <div class="pg-examples">
+      <span class="pg-examples-label">Gợi ý nhanh:</span>
+      <button class="chip" data-fill="…the lockdown @dẫn đến tâm lý hoang mang.">@ dịch câu</button>
+      <button class="chip" data-fill="We need a more !!important. argument here">!! đồng nghĩa</button>
+      <button class="chip" data-fill="#analyze.">＃ phân tích từ</button>
+    </div>
+
+    <div class="pg-stage">
+      <label class="pg-label" for="pg-input">Ô soạn thảo của bạn</label>
+      <textarea id="pg-input" class="pg-input" rows="6"
+        placeholder="Gõ ở đây… ví dụ:  this trend @dẫn đến tâm lý hoang mang."
+        spellcheck="false"></textarea>
+      <div class="pg-hint">
+        <span><kbd>@</kbd> dịch · <kbd>!!</kbd> đồng nghĩa · <kbd>#</kbd> phân tích · luôn kết thúc bằng <kbd>.</kbd></span>
+        <span class="pg-hint-r">Esc để đóng · click để chèn</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── HOW IT WORKS ─────────────────────────────────────────────────── -->
+  <section class="how">
+    <h2 class="section-h">Cách hoạt động</h2>
+    <div class="steps">
+      <div class="step"><span class="step-n">1</span><p>Bạn gõ một cụm với ký hiệu kích hoạt và dấu chấm.</p></div>
+      <div class="step"><span class="step-n">2</span><p>Vibe Typing nhận diện ý định và gửi cụm từ + ngữ cảnh tới agent.</p></div>
+      <div class="step"><span class="step-n">3</span><p>Agent (LLM trên GreenNode AgentBase) trả về gợi ý dạng JSON.</p></div>
+      <div class="step"><span class="step-n">4</span><p>Bạn click để chèn — văn bản tự thay thế ngay tại chỗ.</p></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Powered by <b>OpenClaw</b> · GreenNode AgentBase Runtime</p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
