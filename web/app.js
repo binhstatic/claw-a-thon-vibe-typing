@@ -19,13 +19,44 @@
   const input   = document.getElementById('pg-input');
   const overlay = document.getElementById('pg-overlay');
 
-  let dropdown = null;
-  let backdrop = null;
+  let dropdown   = null;
+  let backdrop   = null;
   let currentMatch = null;
-  let abortCtrl = null;
+  let abortCtrl  = null;
   let sweepTimer = null;
+  let undoState  = null;
+  let undoTimer  = null;
+
+  const undoBtn = document.getElementById('vt-undo-btn');
 
   function isMobile() { return window.innerWidth <= 600; }
+
+  // ─── UNDO ──────────────────────────────────────────────────────────────────
+  function saveUndo(value, caretPos) {
+    undoState = { value, caretPos };
+    clearTimeout(undoTimer);
+    undoBtn.classList.add('vt-undo-visible');
+    undoTimer = setTimeout(clearUndo, 5000);
+  }
+
+  function clearUndo() {
+    clearTimeout(undoTimer);
+    undoState = null;
+    undoBtn.classList.remove('vt-undo-visible');
+  }
+
+  function undoLast() {
+    if (!undoState) return;
+    const { value, caretPos } = undoState;
+    clearUndo();
+    input.value = value;
+    input.setSelectionRange(caretPos, caretPos);
+    renderOverlay();
+    input.focus();
+  }
+
+  undoBtn.addEventListener('click', undoLast);
+  undoBtn.addEventListener('touchstart', e => { e.preventDefault(); undoLast(); }, { passive: false });
 
   // ─── HARDCODED DEMO RESPONSES ──────────────────────────────────────────────
   const MOCK_RESPONSES = {
@@ -294,6 +325,7 @@
   async function applyChoiceAnimated(toPhrase) {
     if (!currentMatch) return;
     const savedMatch = { ...currentMatch };
+    saveUndo(input.value, currentMatch.matchStart); // save before any change
     removeDropdown();
     overlay.innerHTML = ''; // clear highlight before animation starts
 
@@ -435,11 +467,16 @@
   }
 
   // ─── EVENTS ────────────────────────────────────────────────────────────────
-  input.addEventListener('input', () => { renderOverlay(); detect(); });
+  input.addEventListener('input', () => { clearUndo(); renderOverlay(); detect(); });
   input.addEventListener('scroll', () => { overlay.scrollTop = input.scrollTop; });
   input.addEventListener('click', () => { if (dropdown) removeDropdown(); });
 
   document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && undoState) {
+      e.preventDefault();
+      undoLast();
+      return;
+    }
     if (e.key === 'Escape' && dropdown) { e.stopPropagation(); removeDropdown(); }
   }, true);
 
@@ -447,7 +484,8 @@
     if (dropdown && !dropdown.contains(e.target) && e.target !== input) removeDropdown();
   }, true);
 
-  window.addEventListener('resize', () => { if (dropdown) removeDropdown(); });
+  // on mobile the keyboard appearing/hiding triggers resize — don't close dropdown
+  window.addEventListener('resize', () => { if (dropdown && !isMobile()) removeDropdown(); });
 
   // ─── GUIDED EXAMPLES ───────────────────────────────────────────────────────
   // Chips fill the textarea and auto-trigger; card buttons scroll + fill.
