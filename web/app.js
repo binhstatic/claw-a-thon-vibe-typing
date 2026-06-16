@@ -16,7 +16,8 @@
 
   const AGENT_URL = `${AGENT_BASE_URL}/suggest`;
 
-  const input = document.getElementById('pg-input');
+  const input   = document.getElementById('pg-input');
+  const overlay = document.getElementById('pg-overlay');
 
   let dropdown = null;
   let backdrop = null;
@@ -178,13 +179,15 @@
     const hdr = document.createElement('div');
     hdr.className = 'vt-header';
     hdr.innerHTML =
-      `<span class="vt-hlabel">${MODE_LABELS[match.mode]}</span>` +
-      `<span class="vt-hphrase">&ldquo;${esc(match.phrase)}&rdquo;</span>` +
-      `<button class="vt-close" title="Đóng">&#x2715;</button>`;
-    hdr.querySelector('.vt-close').addEventListener('mousedown', ev => {
-      ev.preventDefault();
-      removeDropdown();
-    });
+      (isMobile() ? '<div class="vt-handle"></div>' : '') +
+      `<div class="vt-header-row">` +
+        `<span class="vt-hlabel">${MODE_LABELS[match.mode]}</span>` +
+        `<span class="vt-hphrase">&ldquo;${esc(match.phrase)}&rdquo;</span>` +
+        `<button class="vt-close" title="Đóng">&#x2715;</button>` +
+      `</div>`;
+    const closeBtn = hdr.querySelector('.vt-close');
+    closeBtn.addEventListener('mousedown', ev => { ev.preventDefault(); removeDropdown(); });
+    closeBtn.addEventListener('touchstart', ev => { ev.preventDefault(); removeDropdown(); }, { passive: false });
     return hdr;
   }
 
@@ -193,11 +196,6 @@
     currentMatch = match;
     const d = document.createElement('div');
     d.className = 'vt-dropdown';
-    if (isMobile()) {
-      const handle = document.createElement('div');
-      handle.className = 'vt-handle';
-      d.appendChild(handle);
-    }
     d.appendChild(makeHeader(match));
     return d;
   }
@@ -297,6 +295,7 @@
     if (!currentMatch) return;
     const savedMatch = { ...currentMatch };
     removeDropdown();
+    overlay.innerHTML = ''; // clear highlight before animation starts
 
     const { fullMatch, matchStart } = savedMatch;
     const before  = input.value.substring(0, matchStart);
@@ -313,6 +312,7 @@
           clearInterval(sweepTimer);
           input.value = before + toPhrase + after;
           input.setSelectionRange(matchStart + toPhrase.length, matchStart + toPhrase.length);
+          renderOverlay();
           resolve();
           return;
         }
@@ -322,6 +322,72 @@
       }, 35);
     });
   }
+
+  // ─── OVERLAY HIGHLIGHT ─────────────────────────────────────────────────────
+  const OVERLAY_TRIGGERS = [
+    { re: /@([^@\n]{2,80})\./g,  mode: 'translate' },
+    { re: /!!([^!\n]{2,80})\./g, mode: 'synonyms'  },
+    { re: /#([^#\n]{2,60})\./g,  mode: 'analyze'   },
+  ];
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function escAttr(s) { return s.replace(/"/g,'&quot;'); }
+
+  function renderOverlay() {
+    const text = input.value;
+    const matches = [];
+    for (const { re, mode } of OVERLAY_TRIGGERS) {
+      const rx = new RegExp(re.source, 'g');
+      let m;
+      while ((m = rx.exec(text)) !== null) {
+        matches.push({ start: m.index, end: m.index + m[0].length,
+                       full: m[0], phrase: m[1].trim(), mode });
+      }
+    }
+    matches.sort((a, b) => a.start - b.start);
+    let html = '', pos = 0;
+    for (const mt of matches) {
+      if (mt.start < pos) continue;
+      html += escHtml(text.slice(pos, mt.start));
+      html += `<span class="pg-highlight" data-start="${mt.start}" ` +
+              `data-mode="${escAttr(mt.mode)}" data-phrase="${escAttr(mt.phrase)}" ` +
+              `data-full="${escAttr(mt.full)}">${escHtml(mt.full)}</span>`;
+      pos = mt.end;
+    }
+    html += escHtml(text.slice(pos));
+    overlay.innerHTML = html;
+    overlay.scrollTop = input.scrollTop;
+  }
+
+  overlay.addEventListener('click', e => {
+    const span = e.target.closest('.pg-highlight');
+    if (!span) return;
+    const fullMatch  = span.dataset.full;
+    const phrase     = span.dataset.phrase;
+    const mode       = span.dataset.mode;
+    const matchStart = parseInt(span.dataset.start, 10);
+    const text       = input.value;
+    const before     = text.substring(0, matchStart);
+    const sentStart  = Math.max(
+      before.lastIndexOf('. ') + 2,
+      before.lastIndexOf('? ') + 2,
+      before.lastIndexOf('! ') + 2,
+      0
+    );
+    const context = before.substring(sentStart).trim();
+    const match = { fullMatch, phrase, mode, matchStart, context };
+    if (abortCtrl) abortCtrl.abort();
+    abortCtrl = new AbortController();
+    const { signal } = abortCtrl;
+    showLoading(match);
+    callAgent(mode, phrase, context, signal).then(suggestions => {
+      if (!signal.aborted) {
+        if (suggestions && suggestions.length) showSuggestions(match, suggestions);
+        else showError(match, 'không có kết quả');
+      }
+    }).catch(err => { if (err.name !== 'AbortError') showError(match, err.message); });
+  });
 
   // ─── DETECT TRIGGER ────────────────────────────────────────────────────────
   async function detect() {
@@ -369,7 +435,8 @@
   }
 
   // ─── EVENTS ────────────────────────────────────────────────────────────────
-  input.addEventListener('input', detect);
+  input.addEventListener('input', () => { renderOverlay(); detect(); });
+  input.addEventListener('scroll', () => { overlay.scrollTop = input.scrollTop; });
   input.addEventListener('click', () => { if (dropdown) removeDropdown(); });
 
   document.addEventListener('keydown', e => {
@@ -405,6 +472,7 @@
     input.focus();
     const caret = caretAfterTrigger(value);
     input.setSelectionRange(caret, caret);
+    renderOverlay();
     detect();
   }
 

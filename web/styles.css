@@ -84,6 +84,71 @@ kbd {
   margin-bottom: 0;
 }
 
+/* ─── CTA BUTTONS ──────────────────────────────────────── */
+.hero-cta {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  align-items: center; margin-top: 36px;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  border-radius: 999px; padding: 13px 26px;
+  font-size: 15px; font-weight: 700; line-height: 1;
+  text-decoration: none; cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s;
+  white-space: nowrap; border: none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(124,58,237,0.38);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.5); }
+.btn-primary:active { transform: translateY(0); }
+.btn-chrome {
+  background: rgba(255,255,255,0.85);
+  color: var(--ink);
+  border: 1.5px solid #ddd8f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.btn-chrome:hover {
+  border-color: var(--violet);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.18);
+  transform: translateY(-1px);
+}
+
+/* ─── PLATFORM STRIP ───────────────────────────────────── */
+.hero-platforms {
+  margin-top: 48px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
+}
+.platforms-label {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #a89ec4;
+}
+.platform-list {
+  display: flex; flex-wrap: wrap; gap: 7px; align-items: center;
+}
+.plat {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; border-radius: 12px;
+  background: rgba(255,255,255,0.8);
+  border: 1px solid rgba(220,215,240,0.9);
+  color: var(--brand, var(--violet));
+  transition: transform 0.15s, box-shadow 0.18s;
+  cursor: default;
+}
+.plat:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  background: #fff;
+}
+.plat svg { width: 20px; height: 20px; display: block; }
+.platforms-more {
+  font-size: 12.5px; color: #b0a8c7; font-style: italic;
+}
+
 .hero-triggers {
   display: flex; gap: 10px; flex-wrap: wrap;
   margin-top: 26px;
@@ -136,17 +201,44 @@ section { max-width: 980px; margin: 0 auto; padding: 64px 24px; }
   text-transform: uppercase; letter-spacing: 0.07em;
   color: #9ca3af; margin-bottom: 10px;
 }
+.pg-input-wrap { position: relative; }
 .pg-input {
   width: 100%; resize: vertical;
   border: 1.5px solid #e5e0f5; border-radius: 12px;
   padding: 16px; font-size: 16px; line-height: 1.6;
   color: var(--ink); font-family: inherit;
   transition: border-color 0.15s, box-shadow 0.15s;
+  position: relative; z-index: 1; background: transparent;
 }
 .pg-input:focus {
   outline: none; border-color: var(--violet);
   box-shadow: 0 0 0 4px rgba(124,58,237,0.12);
 }
+/* overlay mirrors textarea layout; only highlights are visible */
+.pg-overlay {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  padding: 16px;
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  font-size: 16px; line-height: 1.6;
+  font-family: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: hidden;
+  color: transparent;
+  z-index: 2;
+}
+.pg-highlight {
+  pointer-events: auto;
+  cursor: pointer;
+  background: rgba(124, 58, 237, 0.10);
+  border-bottom: 2px solid rgba(124, 58, 237, 0.55);
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+.pg-highlight:hover  { background: rgba(124, 58, 237, 0.2); }
+.pg-highlight:active { background: rgba(124, 58, 237, 0.3); }
 .pg-hint {
   display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
   margin-top: 12px; font-size: 12.5px; color: var(--muted);
@@ -268,6 +360,8 @@ section { max-width: 980px; margin: 0 auto; padding: 64px 24px; }
   .cards { grid-template-columns: 1fr; }
   .steps { grid-template-columns: repeat(2, 1fr); }
   .brand-pill { display: none; }
+  .hero-platforms { align-items: center; text-align: center; }
+  .btn { padding: 12px 22px; font-size: 14px; }
 }
 @media (max-width: 440px) {
   .steps { grid-template-columns: 1fr; }
@@ -293,6 +387,7 @@ section { max-width: 980px; margin: 0 auto; padding: 64px 24px; }
   display: flex; align-items: center; gap: 8px;
   padding: 10px 14px; background: var(--grad); color: #fff; font-size: 12.5px;
 }
+.vt-header-row { display: contents; } /* desktop: transparent wrapper */
 .vt-hlabel { font-weight: 700; white-space: nowrap; }
 .vt-hphrase { flex: 1; opacity: 0.88; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vt-close {
@@ -342,13 +437,8 @@ section { max-width: 980px; margin: 0 auto; padding: 64px 24px; }
 }
 .vt-backdrop.vt-visible { opacity: 1; }
 
-.vt-handle {
-  width: 36px; height: 4px;
-  background: rgba(255,255,255,0.45);
-  border-radius: 2px;
-  margin: 10px auto 4px;
-  flex-shrink: 0;
-}
+/* handle lives inside the gradient header on mobile; hidden on desktop */
+.vt-handle { display: none; }
 
 @media (max-width: 600px) {
   .vt-dropdown {
@@ -360,7 +450,6 @@ section { max-width: 980px; margin: 0 auto; padding: 64px 24px; }
     border-radius: 20px 20px 0 0;
     max-height: 72vh;
     overflow-y: auto;
-    /* override desktop initial transform */
     transform: translateY(105%) !important;
     transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1),
                 opacity 0.24s ease !important;
@@ -369,6 +458,24 @@ section { max-width: 980px; margin: 0 auto; padding: 64px 24px; }
   .vt-dropdown.vt-visible {
     transform: translateY(0) !important;
     opacity: 1;
+  }
+  /* header becomes column: handle on top of gradient, then label row */
+  .vt-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 12px 16px 14px;
+    border-radius: 20px 20px 0 0;
+  }
+  .vt-handle {
+    display: block;
+    width: 36px; height: 4px;
+    background: rgba(255,255,255,0.45);
+    border-radius: 2px;
+    margin: 0 auto 10px;
+  }
+  .vt-header-row {
+    display: flex; align-items: center; gap: 8px;
   }
   /* larger touch targets */
   .vt-item {
