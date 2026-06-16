@@ -21,6 +21,7 @@
   let dropdown = null;
   let currentMatch = null;
   let abortCtrl = null;
+  let sweepTimer = null;
 
   // ─── AGENT CALL ────────────────────────────────────────────────────────────
   async function callAgent(mode, phrase, context, signal) {
@@ -163,7 +164,7 @@
         `<div class="vt-meta">(${esc(s.breakdown)}: <em>${esc(s.meaning)}</em>)</div>`;
       li.addEventListener('mousedown', ev => {
         ev.preventDefault();
-        applyChoice(s.phrase);
+        applyChoiceAnimated(s.phrase);
       });
       ul.appendChild(li);
     });
@@ -185,6 +186,7 @@
   }
 
   function removeDropdown() {
+    clearInterval(sweepTimer);
     if (dropdown) {
       dropdown.classList.remove('vt-visible');
       const old = dropdown;
@@ -194,18 +196,35 @@
     currentMatch = null;
   }
 
-  // ─── APPLY CHOICE ──────────────────────────────────────────────────────────
-  function applyChoice(chosen) {
+  // ─── CURSOR SWEEP ANIMATION ────────────────────────────────────────────────
+  async function applyChoiceAnimated(toPhrase) {
     if (!currentMatch) return;
-    const { fullMatch, matchStart } = currentMatch;
-    const v = input.value;
-    const before = v.substring(0, matchStart);
-    const after  = v.substring(matchStart + fullMatch.length);
-    input.value = before + chosen + after;
-    const caret = matchStart + chosen.length;
-    input.setSelectionRange(caret, caret);
-    input.focus();
+    const savedMatch = { ...currentMatch };
     removeDropdown();
+
+    const { fullMatch, matchStart } = savedMatch;
+    const before  = input.value.substring(0, matchStart);
+    const after   = input.value.substring(matchStart + fullMatch.length);
+    const maxLen  = Math.max(fullMatch.length, toPhrase.length);
+
+    input.focus();
+
+    await new Promise(resolve => {
+      let i = 0;
+      clearInterval(sweepTimer);
+      sweepTimer = setInterval(() => {
+        if (i > maxLen) {
+          clearInterval(sweepTimer);
+          input.value = before + toPhrase + after;
+          input.setSelectionRange(matchStart + toPhrase.length, matchStart + toPhrase.length);
+          resolve();
+          return;
+        }
+        input.value = before + toPhrase.slice(0, i) + fullMatch.slice(i) + after;
+        input.setSelectionRange(matchStart + i, matchStart + i);
+        i++;
+      }, 35);
+    });
   }
 
   // ─── DETECT TRIGGER ────────────────────────────────────────────────────────
