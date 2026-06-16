@@ -37,6 +37,7 @@ function callLLM(prompt) {
       model:       LLM_MODEL,
       messages:    [{ role: 'user', content: prompt }],
       temperature: 0.7,
+      max_tokens:  20000,
     }));
 
     const req = https.request({
