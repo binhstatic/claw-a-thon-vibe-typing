@@ -19,12 +19,83 @@
   const input = document.getElementById('pg-input');
 
   let dropdown = null;
+  let backdrop = null;
   let currentMatch = null;
   let abortCtrl = null;
   let sweepTimer = null;
 
+  function isMobile() { return window.innerWidth <= 600; }
+
+  // ─── HARDCODED DEMO RESPONSES ──────────────────────────────────────────────
+  const MOCK_RESPONSES = {
+    'translate:không thể tập trung học': [
+      {
+        phrase: 'utterly fail to retain a single concept',
+        breakdown: 'fail to + VP (hyperbolic)',
+        meaning: 'không tiếp thu được gì — dù đã uống đủ cà phê để lay cả thư viện',
+      },
+      {
+        phrase: 'find myself incapable of any sustained focus',
+        breakdown: 'find oneself + adj. phrase (formal)',
+        meaning: 'không duy trì được sự tập trung — nghe học thuật nhưng rất thật',
+      },
+      {
+        phrase: 'struggle to absorb even the simplest material',
+        breakdown: 'struggle to + V (relatable)',
+        meaning: 'vật lộn với cả nội dung đơn giản nhất — cảm giác quen thuộc với mọi sinh viên',
+      },
+    ],
+    'synonyms:significant': [
+      {
+        phrase: 'pronounced',
+        breakdown: 'adj. (scientific register)',
+        meaning: 'rõ rệt — nghe rất data-driven, chuẩn cho phần kết quả nghiên cứu',
+      },
+      {
+        phrase: 'substantial',
+        breakdown: 'adj. (academic)',
+        meaning: 'đáng kể — mạnh hơn "significant" nhưng ít drama hơn "massive"',
+      },
+      {
+        phrase: 'marked',
+        breakdown: 'adj. (concise)',
+        meaning: 'rõ ràng, đột ngột — ngắn gọn và tự tin, hay dùng trong báo khoa học',
+      },
+      {
+        phrase: 'non-trivial',
+        breakdown: 'adj. (understatement)',
+        meaning: 'không tầm thường — cách nói giảm nhẹ nhưng nghe cực kỳ ngầu trong giới học thuật',
+      },
+    ],
+    'analyze:procrastinate': [
+      {
+        phrase: 'procrastinate  /proʊˈkræstɪneɪt/  (v.)',
+        breakdown: 'IPA + từ loại',
+        meaning: 'trì hoãn — động từ mô tả chính xác việc bạn đang làm thay vì đọc tài liệu',
+      },
+      {
+        phrase: 'procrastinate on [assignments / decisions / life choices]',
+        breakdown: 'collocation phổ biến',
+        meaning: 'đi kèm "on" — nghe học thuật hơn "không chịu làm" rất nhiều',
+      },
+      {
+        phrase: 'a chronic procrastinator  (n.)',
+        breakdown: 'danh từ hoá',
+        meaning: 'kẻ trì hoãn mãn tính — có thể dùng trong phần giới thiệu bản thân',
+      },
+      {
+        phrase: '"Procrastination is the thief of time."',
+        breakdown: 'proverb (trích dẫn)',
+        meaning: 'trì hoãn là kẻ cắp thời gian — hay trích khi nộp bài muộn để nghe đỡ tệ hơn',
+      },
+    ],
+  };
+
   // ─── AGENT CALL ────────────────────────────────────────────────────────────
   async function callAgent(mode, phrase, context, signal) {
+    const mockKey = `${mode}:${phrase.trim().toLowerCase()}`;
+    if (MOCK_RESPONSES[mockKey]) return MOCK_RESPONSES[mockKey];
+
     const res = await fetch(AGENT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -122,6 +193,11 @@
     currentMatch = match;
     const d = document.createElement('div');
     d.className = 'vt-dropdown';
+    if (isMobile()) {
+      const handle = document.createElement('div');
+      handle.className = 'vt-handle';
+      d.appendChild(handle);
+    }
     d.appendChild(makeHeader(match));
     return d;
   }
@@ -179,18 +255,38 @@
   }
 
   function mount(d, match) {
-    const { x, y } = anchorFor(input);
     document.body.appendChild(d);
     dropdown = d;
-    placeDropdown(d, x, y);
+
+    if (isMobile()) {
+      input.blur(); // hide keyboard while modal is open
+      backdrop = document.createElement('div');
+      backdrop.className = 'vt-backdrop';
+      document.body.appendChild(backdrop);
+      backdrop.addEventListener('mousedown', ev => { ev.preventDefault(); removeDropdown(); });
+      backdrop.addEventListener('touchstart', ev => { ev.preventDefault(); removeDropdown(); }, { passive: false });
+      requestAnimationFrame(() => {
+        backdrop.classList.add('vt-visible');
+        d.classList.add('vt-visible');
+      });
+    } else {
+      const { x, y } = anchorFor(input);
+      placeDropdown(d, x, y);
+    }
   }
 
   function removeDropdown() {
     clearInterval(sweepTimer);
+    if (backdrop) {
+      backdrop.classList.remove('vt-visible');
+      const oldBd = backdrop;
+      setTimeout(() => oldBd.parentNode && oldBd.parentNode.removeChild(oldBd), 260);
+      backdrop = null;
+    }
     if (dropdown) {
       dropdown.classList.remove('vt-visible');
       const old = dropdown;
-      setTimeout(() => old.parentNode && old.parentNode.removeChild(old), 180);
+      setTimeout(() => old.parentNode && old.parentNode.removeChild(old), 260);
       dropdown = null;
     }
     currentMatch = null;
@@ -284,7 +380,6 @@
     if (dropdown && !dropdown.contains(e.target) && e.target !== input) removeDropdown();
   }, true);
 
-  window.addEventListener('scroll', () => { if (dropdown) removeDropdown(); }, { passive: true });
   window.addEventListener('resize', () => { if (dropdown) removeDropdown(); });
 
   // ─── GUIDED EXAMPLES ───────────────────────────────────────────────────────
@@ -318,9 +413,9 @@
   });
 
   const CARD_EXAMPLES = {
-    translate: '…the new policy @dẫn đến tâm lý hoang mang.',
-    synonyms:  'This is a very !!important. issue',
-    analyze:   '#impact.',
+    translate: 'After 3 cups of coffee, I still @không thể tập trung học.',
+    synonyms:  'The data shows a !!significant. drop in student focus',
+    analyze:   '#procrastinate.',
   };
   document.querySelectorAll('.card-try').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -344,6 +439,22 @@
       label.textContent = 'Agent: offline';
     }
   })();
+
+  // ─── STEP ANIMATIONS ──────────────────────────────────────────────────────
+  const stepEls = document.querySelectorAll('.step');
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.25 });
+    stepEls.forEach(el => observer.observe(el));
+  } else {
+    stepEls.forEach(el => el.classList.add('is-visible'));
+  }
 
   // ─── UTIL ──────────────────────────────────────────────────────────────────
   function esc(s) {
