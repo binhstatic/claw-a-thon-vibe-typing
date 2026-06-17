@@ -175,6 +175,35 @@ section { max-width: 980px; margin: 0 auto; padding: 64px 24px; }
   text-align: center; margin-bottom: 8px;
 }
 .section-sub { text-align: center; color: var(--muted); margin-bottom: 38px; }
+.section-intro {
+  max-width: 720px;
+  margin: 0 auto 40px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.75;
+}
+.section-intro p { margin-bottom: 14px; }
+.section-intro p:last-child { margin-bottom: 0; }
+.section-intro strong { color: var(--ink); }
+.pain-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 18px;
+}
+.pain-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13.5px;
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+}
 
 /* ─── PLAYGROUND ───────────────────────────────────────── */
 .pg-examples {
@@ -268,6 +297,13 @@ section { max-width: 980px; margin: 0 auto; padding: 64px 24px; }
 }
 .card h3 { font-size: 18px; margin-bottom: 8px; letter-spacing: -0.01em; }
 .card p { color: var(--muted); font-size: 14px; }
+.card-scene {
+  font-style: italic;
+  font-size: 13px !important;
+  color: #a09ab8 !important;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
 .card-eg {
   margin-top: 16px; padding: 12px 14px;
   background: #f8f7ff; border: 1px solid #ece6fb;

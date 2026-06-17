@@ -85,16 +85,25 @@
   <!-- ─── USE CASES ────────────────────────────────────────────────────── -->
   <section class="usecases" id="usecases">
     <h2 class="section-h">Ba tình huống sử dụng</h2>
-    <p class="section-sub">Mỗi ký hiệu kích hoạt một chế độ. Luôn kết thúc bằng <b>dấu chấm (.)</b> để xác nhận.</p>
+    <div class="section-intro">
+      <p>Cảnh quen thuộc lúc 2 giờ sáng: bạn đang viết luận văn, cần một từ tiếng Anh "nghe cho ra dáng học thuật" nhưng não trống rỗng như cái tủ lạnh ký túc xá cuối tháng — mở Google Dịch thì nhận về câu như robot dịch từ tiếng Sao Hỏa, bấm quay lại thì quên béng định viết gì. Ai rồi cũng từng ở đây:</p>
+      <div class="pain-chips">
+        <span class="pain-chip">📖 Vốn từ vựng có hạn</span>
+        <span class="pain-chip">🔀 Nhảy 7 tab từ điển liên tục</span>
+        <span class="pain-chip">💨 Mất mạch tư duy giữa chừng</span>
+        <span class="pain-chip">⏳ Deadline ngồi đó cười nhạt</span>
+      </div>
+      <p><strong>Vibe Typing Agent</strong> xuất hiện đúng kiểu wingman ngồi sẵn ngay trong ô soạn thảo của bạn. Không đổi tab, không mở app — cài Chrome Extension (hoặc ghé web playground). Bạn chỉ cần niệm một trong ba "thần chú", nhớ chấm một dấu chấm ở cuối để ra hiệu <em>"xong rồi nha, làm việc đi"</em>:</p>
+    </div>
 
     <div class="cards">
       <article class="card" data-mode="translate">
         <div class="card-badge">@</div>
         <h3>Dịch theo ngữ cảnh</h3>
-        <p>Gõ <code>@cụm tiếng Việt.</code> để nhận <b>3 cách diễn đạt tiếng Anh</b> phù hợp với câu đang viết.</p>
+        <p>Gõ <code>@cụm tiếng Việt.</code> — gõ ý bằng tiếng Việt, nhận lại <b>câu tiếng Anh học thuật</b> xịn sò, tạm biệt "Vietlish" khiến giáo sư khẽ nhíu mày.</p>
         <div class="card-eg">
           <span class="eg-in">…this policy <b>@dẫn đến tâm lý hoang mang.</b></span>
-          <span class="eg-out">→ “leads to widespread anxiety”, “gives rise to public confusion”…</span>
+          <span class="eg-out">→ "leads to widespread anxiety", "gives rise to public confusion"…</span>
         </div>
         <button class="card-try" data-try="translate">Thử trong playground →</button>
       </article>
@@ -102,10 +111,11 @@
       <article class="card" data-mode="synonyms">
         <div class="card-badge">!!</div>
         <h3>Từ đồng nghĩa</h3>
-        <p>Gõ <code>!!từ tiếng Anh.</code> để nhận <b>4 từ đồng nghĩa</b> dùng được trong văn học thuật.</p>
+        <p class="card-scene">Bài viết lặp lại <em>important</em> tới lần thứ 47 mà không biết thay bằng gì cho hợp văn phong?</p>
+        <p>Gõ <code>!!từ tiếng Anh.</code> — xin ngay một rổ <b>4 từ đồng nghĩa</b> học thuật để thay thế, chán từ cũ là có từ mới ngay.</p>
         <div class="card-eg">
           <span class="eg-in">This is a very <b>!!important.</b> issue</span>
-          <span class="eg-out">→ “crucial”, “significant”, “vital”, “paramount”…</span>
+          <span class="eg-out">→ "crucial", "significant", "vital", "paramount"…</span>
         </div>
         <button class="card-try" data-try="synonyms">Thử trong playground →</button>
       </article>
@@ -113,10 +123,11 @@
       <article class="card" data-mode="analyze">
         <div class="card-badge">#</div>
         <h3>Phân tích từ vựng</h3>
-        <p>Gõ <code>#từ.</code> để xem <b>phát âm, từ loại, collocation và thành ngữ</b> liên quan.</p>
+        <p class="card-scene">Muốn mổ xẻ một từ cho tới tận cùng — phát âm, dùng với gì, thành ngữ nào đi kèm?</p>
+        <p>Gõ <code>#từ.</code> — nhận nguyên bộ hồ sơ lý lịch: <b>phát âm, collocation và thành ngữ</b> liên quan, như có một cuốn từ điển biết tám chuyện.</p>
         <div class="card-eg">
           <span class="eg-in"><b>#impact.</b></span>
-          <span class="eg-out">→ impact /ˈɪmpækt/ (n), “have an impact on”, impactful (adj)…</span>
+          <span class="eg-out">→ impact /ˈɪmpækt/ (n), "have an impact on", impactful (adj)…</span>
         </div>
         <button class="card-try" data-try="analyze">Thử trong playground →</button>
       </article>
