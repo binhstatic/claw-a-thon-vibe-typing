@@ -348,13 +348,13 @@
       const phrase     = m[1].trim();
       const matchStart = m.index;
 
-      const before    = text.substring(0, matchStart);
-      const sentStart = Math.max(
+      const before = text.substring(0, matchStart);
+      const sentCandidates = [
         before.lastIndexOf('. ') + 2,
         before.lastIndexOf('? ') + 2,
         before.lastIndexOf('! ') + 2,
-        0
-      );
+      ].filter(i => i >= 2);
+      const sentStart = sentCandidates.length ? Math.max(...sentCandidates) : 0;
       const context = before.substring(sentStart).trim();
       const match   = isCE
         ? { fullMatch, phrase, mode, matchStart, context, isCE: true }
@@ -419,7 +419,8 @@
     if (dropdown && !dropdown.contains(e.target)) removeDropdown();
   }, true);
 
-  document.addEventListener('scroll', () => { if (dropdown) removeDropdown(); }, { passive: true, capture: true });
+  // Intentionally no scroll listener — popup stays open while scrolling.
+  // It closes only via: X button, click outside, or selecting an option.
 
   // ─── UTIL ─────────────────────────────────────────────────────────────────────
   function esc(s) {

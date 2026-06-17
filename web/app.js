@@ -255,7 +255,7 @@
     if (match.mode === 'translate' && match.context) {
       const ctx = document.createElement('div');
       ctx.className = 'vt-context';
-      ctx.innerHTML = `<b>Ngữ cảnh:</b> ${esc(match.context)}`;
+      ctx.innerHTML = `<b>Ngữ cảnh:</b> ${esc(truncateCtx(match.context))}`;
       d.appendChild(ctx);
     }
 
@@ -401,13 +401,7 @@
     const matchStart = parseInt(span.dataset.start, 10);
     const text       = input.value;
     const before     = text.substring(0, matchStart);
-    const sentStart  = Math.max(
-      before.lastIndexOf('. ') + 2,
-      before.lastIndexOf('? ') + 2,
-      before.lastIndexOf('! ') + 2,
-      0
-    );
-    const context = before.substring(sentStart).trim();
+    const context = before.substring(sentenceStart(before)).trim();
     const match = { fullMatch, phrase, mode, matchStart, context };
     if (abortCtrl) abortCtrl.abort();
     abortCtrl = new AbortController();
@@ -437,13 +431,7 @@
       const matchStart = m.index;
 
       const before = text.substring(0, matchStart);
-      const sentStart = Math.max(
-        before.lastIndexOf('. ') + 2,
-        before.lastIndexOf('? ') + 2,
-        before.lastIndexOf('! ') + 2,
-        0
-      );
-      const context = before.substring(sentStart).trim();
+      const context = before.substring(sentenceStart(before)).trim();
       const match = { fullMatch, phrase, mode, matchStart, context };
 
       if (abortCtrl) abortCtrl.abort();
@@ -563,6 +551,25 @@
   }
 
   // ─── UTIL ──────────────────────────────────────────────────────────────────
+  // Returns start index of the current sentence in `text` (after last . ? !)
+  function sentenceStart(text) {
+    const candidates = [
+      text.lastIndexOf('. ') + 2,
+      text.lastIndexOf('? ') + 2,
+      text.lastIndexOf('! ') + 2,
+    ].filter(i => i >= 2); // only count when punctuation actually found (idx >= 0 → +2 >= 2)
+    return candidates.length ? Math.max(...candidates) : 0;
+  }
+
+  // Truncate context from the left at a word boundary, prefix with "…"
+  function truncateCtx(ctx, maxLen) {
+    if (!maxLen) maxLen = 55;
+    if (ctx.length <= maxLen) return ctx;
+    const cut = ctx.slice(ctx.length - maxLen);
+    const space = cut.indexOf(' ');
+    return '…' + (space >= 0 ? cut.slice(space + 1) : cut);
+  }
+
   function esc(s) {
     return String(s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;')
