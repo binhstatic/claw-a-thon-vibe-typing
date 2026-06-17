@@ -51,18 +51,44 @@ npm start
 # Agent runs on http://localhost:8080
 ```
 
-### 2. Load the Chrome Extension
+### 2. Cài extension thủ công (Manual Installation)
 
-1. Open `chrome://extensions`
-2. Enable **Developer mode**
-3. Click **Load unpacked** → select the `extension/` folder
-4. The Vibe Typing icon appears in the toolbar
+Extension chưa publish lên Chrome Web Store, nên cần cài bằng cách load thủ công (Developer mode).
 
-Update `extension/config.js` to point to your agent:
+#### Bước 1 — Tải source code
 
-```js
-const AGENT_BASE_URL = 'http://localhost:8080';
+Clone repo về máy hoặc tải ZIP:
+
+```bash
+git clone <repo-url>
+# hoặc tải ZIP từ GitHub → Extract → nhớ đường dẫn thư mục extension/
 ```
+
+#### Bước 2 — Mở trang quản lý extension
+
+| Trình duyệt | Địa chỉ |
+|-------------|---------|
+| Chrome | `chrome://extensions` |
+| Edge | `edge://extensions` |
+| Brave | `brave://extensions` |
+| Arc | `chrome://extensions` (mở từ menu → Extensions) |
+
+#### Bước 3 — Bật Developer mode
+
+Gạt công tắc **Developer mode** (góc trên bên phải) sang **ON**.
+
+#### Bước 4 — Load unpacked
+
+1. Click **Load unpacked**
+2. Chọn thư mục `extension/` trong repo (thư mục chứa `manifest.json`)
+3. Click **Select Folder** / **Open**
+
+Extension **Vibe Typing — Smart Translator** sẽ xuất hiện trong danh sách và icon hiện ở thanh toolbar.
+
+#### Lưu ý khi cập nhật extension
+
+Mỗi lần pull code mới hoặc sửa file trong `extension/`, cần reload lại extension:
+- Vào trang extensions → tìm **Vibe Typing** → click icon **Reload** (↻)
 
 ### 3. Run the web playground locally
 
