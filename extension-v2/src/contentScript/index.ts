@@ -155,6 +155,7 @@ async function detect(el: Element): Promise<void> {
       match.mode,
       match.phrase,
       match.context,
+      config.mask ?? 'academic',
       signal,
     );
     if (signal.aborted) return;

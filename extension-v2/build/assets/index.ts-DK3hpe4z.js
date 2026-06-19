@@ -1,9 +1,4 @@
-const DEFAULT_CONFIG = {
-  agentBaseUrl: "https://endpoint-f0b1c066-9a31-44c0-b18a-866205de4ee2.agentbase-runtime.aiplatform.vngcloud.vn",
-  enableTranslate: true,
-  enableSynonyms: true,
-  enableAnalyze: true
-};
+import { D as DEFAULT_CONFIG } from "./protocol-D7dFRlSf.js";
 const KEY_CONFIG = "config";
 const KEY_DEFAULT_ENABLED = "defaultEnabled";
 const DOMAIN_PREFIX = "domain:";
@@ -88,4 +83,4 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
     chrome.storage.local.set({ installedOn: (/* @__PURE__ */ new Date()).toISOString() });
   }
 });
-//# sourceMappingURL=index.ts-C6yMNFG6.js.map
+//# sourceMappingURL=index.ts-DK3hpe4z.js.map

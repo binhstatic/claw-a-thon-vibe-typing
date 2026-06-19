@@ -1,10 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { ProtocolClient } from '../ProtocolClient';
+  import { MASKS } from '../protocol';
+  import type { MaskId } from '../protocol';
 
   let domain = $state('');
   let enabled = $state(true);
   let agentStatus = $state<'checking' | 'online' | 'offline'>('checking');
+  let selectedMask = $state<MaskId>('academic');
 
   async function getCurrentDomain(): Promise<string> {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -27,6 +30,11 @@
     await ProtocolClient.setDomainStatus(domain, enabled);
   }
 
+  async function selectMask(id: MaskId): Promise<void> {
+    selectedMask = id;
+    await ProtocolClient.setConfig({ mask: id });
+  }
+
   function openOptions(): void {
     ProtocolClient.openOptions();
     window.close();
@@ -39,6 +47,7 @@
       ProtocolClient.getDomainStatus(domain),
     ]);
     enabled = status;
+    selectedMask = cfg.mask ?? 'academic';
     checkHealth(cfg.agentBaseUrl);
   });
 </script>
@@ -76,6 +85,30 @@
     </button>
   </div>
   {/if}
+
+  <!-- Mask selector -->
+  <div class="px-3 py-3 border-b border-gray-100">
+    <div class="text-[10.5px] font-bold text-gray-400 uppercase tracking-wide mb-2">Phong cách viết</div>
+    <div class="grid grid-cols-3 gap-1.5">
+      {#each MASKS as mask}
+        <button
+          onclick={() => selectMask(mask.id)}
+          title={mask.description}
+          class="mask-btn flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg border transition-all cursor-pointer"
+          class:mask-active={selectedMask === mask.id}
+          class:mask-inactive={selectedMask !== mask.id}
+        >
+          <span class="text-[18px] leading-none">{mask.icon}</span>
+          <span class="text-[10px] font-medium leading-tight">{mask.label}</span>
+        </button>
+      {/each}
+    </div>
+    {#each MASKS as mask}
+      {#if selectedMask === mask.id}
+        <p class="mt-1.5 text-[10.5px] text-indigo-600 font-medium text-center">{mask.description}</p>
+      {/if}
+    {/each}
+  </div>
 
   <!-- Trigger guide -->
   <div class="px-4 py-3 border-b border-gray-100">
@@ -131,5 +164,22 @@
   @keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
+  }
+
+  .mask-active {
+    background-color: #ede9fe;
+    border-color: #7c3aed;
+    color: #5b21b6;
+  }
+
+  .mask-inactive {
+    background-color: #f9fafb;
+    border-color: #e5e7eb;
+    color: #4b5563;
+  }
+
+  .mask-inactive:hover {
+    background-color: #f3f4f6;
+    border-color: #d1d5db;
   }
 </style>

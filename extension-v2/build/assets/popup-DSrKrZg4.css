@@ -1,0 +1,22 @@
+
+  @keyframes svelte-c965ga-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .mask-active.svelte-c965ga {
+    background-color: #ede9fe;
+    border-color: #7c3aed;
+    color: #5b21b6;
+  }
+
+  .mask-inactive.svelte-c965ga {
+    background-color: #f9fafb;
+    border-color: #e5e7eb;
+    color: #4b5563;
+  }
+
+  .mask-inactive.svelte-c965ga:hover {
+    background-color: #f3f4f6;
+    border-color: #d1d5db;
+  }

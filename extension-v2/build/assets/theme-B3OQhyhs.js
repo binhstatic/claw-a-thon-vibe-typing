@@ -15,8 +15,8 @@ var _anchor, _hydrate_open, _props, _children, _effect, _main_effect, _pending_e
   if (relList && relList.supports && relList.supports("modulepreload")) {
     return;
   }
-  for (const link of document.querySelectorAll('link[rel="modulepreload"]')) {
-    processPreload(link);
+  for (const link2 of document.querySelectorAll('link[rel="modulepreload"]')) {
+    processPreload(link2);
   }
   new MutationObserver((mutations) => {
     for (const mutation of mutations) {
@@ -29,22 +29,22 @@ var _anchor, _hydrate_open, _props, _children, _effect, _main_effect, _pending_e
       }
     }
   }).observe(document, { childList: true, subtree: true });
-  function getFetchOpts(link) {
+  function getFetchOpts(link2) {
     const fetchOpts = {};
-    if (link.integrity) fetchOpts.integrity = link.integrity;
-    if (link.referrerPolicy) fetchOpts.referrerPolicy = link.referrerPolicy;
-    if (link.crossOrigin === "use-credentials")
+    if (link2.integrity) fetchOpts.integrity = link2.integrity;
+    if (link2.referrerPolicy) fetchOpts.referrerPolicy = link2.referrerPolicy;
+    if (link2.crossOrigin === "use-credentials")
       fetchOpts.credentials = "include";
-    else if (link.crossOrigin === "anonymous") fetchOpts.credentials = "omit";
+    else if (link2.crossOrigin === "anonymous") fetchOpts.credentials = "omit";
     else fetchOpts.credentials = "same-origin";
     return fetchOpts;
   }
-  function processPreload(link) {
-    if (link.ep)
+  function processPreload(link2) {
+    if (link2.ep)
       return;
-    link.ep = true;
-    const fetchOpts = getFetchOpts(link);
-    fetch(link.href, fetchOpts);
+    link2.ep = true;
+    const fetchOpts = getFetchOpts(link2);
+    fetch(link2.href, fetchOpts);
   }
 })();
 const DEV = false;
@@ -54,6 +54,7 @@ var includes = Array.prototype.includes;
 var array_from = Array.from;
 var define_property = Object.defineProperty;
 var get_descriptor = Object.getOwnPropertyDescriptor;
+var get_descriptors = Object.getOwnPropertyDescriptors;
 var object_prototype = Object.prototype;
 var array_prototype = Array.prototype;
 var get_prototype_of = Object.getPrototypeOf;
@@ -170,9 +171,12 @@ function svelte_boundary_reset_onerror() {
 }
 const EACH_ITEM_REACTIVE = 1;
 const EACH_INDEX_REACTIVE = 1 << 1;
+const EACH_IS_CONTROLLED = 1 << 2;
+const EACH_IS_ANIMATED = 1 << 3;
 const EACH_ITEM_IMMUTABLE = 1 << 4;
 const TEMPLATE_USE_IMPORT_NODE = 1 << 1;
 const UNINITIALIZED = Symbol("uninitialized");
+const NAMESPACE_HTML = "http://www.w3.org/1999/xhtml";
 function derived_inert() {
   {
     console.warn(`https://svelte.dev/e/derived_inert`);
@@ -2186,6 +2190,13 @@ function child(node, is_text) {
     return /* @__PURE__ */ get_first_child(node);
   }
 }
+function first_child(node, is_text = false) {
+  {
+    var first = /* @__PURE__ */ get_first_child(node);
+    if (first instanceof Comment && first.data === "") return /* @__PURE__ */ get_next_sibling(first);
+    return first;
+  }
+}
 function sibling(node, count = 1, is_text = false) {
   let next_sibling = node;
   while (count--) {
@@ -2786,13 +2797,13 @@ function update_reaction(reaction) {
 function remove_reaction(signal, dependency) {
   let reactions = dependency.reactions;
   if (reactions !== null) {
-    var index = index_of.call(reactions, signal);
-    if (index !== -1) {
+    var index2 = index_of.call(reactions, signal);
+    if (index2 !== -1) {
       var new_length = reactions.length - 1;
       if (new_length === 0) {
         reactions = dependency.reactions = null;
       } else {
-        reactions[index] = reactions[new_length];
+        reactions[index2] = reactions[new_length];
         reactions.pop();
       }
     }
@@ -3127,6 +3138,14 @@ function text(value = "") {
     return t;
   }
 }
+function comment() {
+  var frag = document.createDocumentFragment();
+  var start = document.createComment("");
+  var anchor = create_text();
+  frag.append(start, anchor);
+  assign_nodes(start, anchor);
+  return frag;
+}
 function append(anchor, dom) {
   if (anchor === null) {
     return;
@@ -3422,6 +3441,423 @@ function if_block(node, fn, elseif = false) {
     }
   }, flags2);
 }
+function index(_, i) {
+  return i;
+}
+function pause_effects(state2, to_destroy, controlled_anchor) {
+  var transitions = [];
+  var length = to_destroy.length;
+  var group;
+  var remaining = to_destroy.length;
+  for (var i = 0; i < length; i++) {
+    let effect = to_destroy[i];
+    pause_effect(
+      effect,
+      () => {
+        if (group) {
+          group.pending.delete(effect);
+          group.done.add(effect);
+          if (group.pending.size === 0) {
+            var groups = (
+              /** @type {Set<EachOutroGroup>} */
+              state2.outrogroups
+            );
+            destroy_effects(state2, array_from(group.done));
+            groups.delete(group);
+            if (groups.size === 0) {
+              state2.outrogroups = null;
+            }
+          }
+        } else {
+          remaining -= 1;
+        }
+      },
+      false
+    );
+  }
+  if (remaining === 0) {
+    var fast_path = transitions.length === 0 && controlled_anchor !== null;
+    if (fast_path) {
+      var anchor = (
+        /** @type {Element} */
+        controlled_anchor
+      );
+      var parent_node = (
+        /** @type {Element} */
+        anchor.parentNode
+      );
+      clear_text_content(parent_node);
+      parent_node.append(anchor);
+      state2.items.clear();
+    }
+    destroy_effects(state2, to_destroy, !fast_path);
+  } else {
+    group = {
+      pending: new Set(to_destroy),
+      done: /* @__PURE__ */ new Set()
+    };
+    (state2.outrogroups ?? (state2.outrogroups = /* @__PURE__ */ new Set())).add(group);
+  }
+}
+function destroy_effects(state2, to_destroy, remove_dom = true) {
+  var preserved_effects;
+  if (state2.pending.size > 0) {
+    preserved_effects = /* @__PURE__ */ new Set();
+    for (const keys of state2.pending.values()) {
+      for (const key of keys) {
+        preserved_effects.add(
+          /** @type {EachItem} */
+          state2.items.get(key).e
+        );
+      }
+    }
+  }
+  for (var i = 0; i < to_destroy.length; i++) {
+    var e = to_destroy[i];
+    if (preserved_effects == null ? void 0 : preserved_effects.has(e)) {
+      e.f |= EFFECT_OFFSCREEN;
+      const fragment = document.createDocumentFragment();
+      move_effect(e, fragment);
+    } else {
+      destroy_effect(to_destroy[i], remove_dom);
+    }
+  }
+}
+var offscreen_anchor;
+function each(node, flags2, get_collection, get_key, render_fn2, fallback_fn = null) {
+  var anchor = node;
+  var items = /* @__PURE__ */ new Map();
+  var is_controlled = (flags2 & EACH_IS_CONTROLLED) !== 0;
+  if (is_controlled) {
+    var parent_node = (
+      /** @type {Element} */
+      node
+    );
+    anchor = parent_node.appendChild(create_text());
+  }
+  var fallback = null;
+  var each_array = /* @__PURE__ */ derived_safe_equal(() => {
+    var collection = get_collection();
+    return (
+      /** @type {V[]} */
+      is_array(collection) ? collection : collection == null ? [] : array_from(collection)
+    );
+  });
+  var array;
+  var pending = /* @__PURE__ */ new Map();
+  var first_run = true;
+  function commit(batch) {
+    if ((state2.effect.f & DESTROYED) !== 0) {
+      return;
+    }
+    state2.pending.delete(batch);
+    state2.fallback = fallback;
+    reconcile(state2, array, anchor, flags2, get_key);
+    if (fallback !== null) {
+      if (array.length === 0) {
+        if ((fallback.f & EFFECT_OFFSCREEN) === 0) {
+          resume_effect(fallback);
+        } else {
+          fallback.f ^= EFFECT_OFFSCREEN;
+          move(fallback, null, anchor);
+        }
+      } else {
+        pause_effect(fallback, () => {
+          fallback = null;
+        });
+      }
+    }
+  }
+  function discard(batch) {
+    state2.pending.delete(batch);
+  }
+  var effect = block(() => {
+    array = /** @type {V[]} */
+    get(each_array);
+    var length = array.length;
+    var keys = /* @__PURE__ */ new Set();
+    var batch = (
+      /** @type {Batch} */
+      current_batch
+    );
+    var defer = should_defer_append();
+    for (var index2 = 0; index2 < length; index2 += 1) {
+      var value = array[index2];
+      var key = get_key(value, index2);
+      var item = first_run ? null : items.get(key);
+      if (item) {
+        if (item.v) internal_set(item.v, value);
+        if (item.i) internal_set(item.i, index2);
+        if (defer) {
+          batch.unskip_effect(item.e);
+        }
+      } else {
+        item = create_item(
+          items,
+          first_run ? anchor : offscreen_anchor ?? (offscreen_anchor = create_text()),
+          value,
+          key,
+          index2,
+          render_fn2,
+          flags2,
+          get_collection
+        );
+        if (!first_run) {
+          item.e.f |= EFFECT_OFFSCREEN;
+        }
+        items.set(key, item);
+      }
+      keys.add(key);
+    }
+    if (length === 0 && fallback_fn && !fallback) {
+      if (first_run) {
+        fallback = branch(() => fallback_fn(anchor));
+      } else {
+        fallback = branch(() => fallback_fn(offscreen_anchor ?? (offscreen_anchor = create_text())));
+        fallback.f |= EFFECT_OFFSCREEN;
+      }
+    }
+    if (length > keys.size) {
+      {
+        each_key_duplicate();
+      }
+    }
+    if (!first_run) {
+      pending.set(batch, keys);
+      if (defer) {
+        for (const [key2, item2] of items) {
+          if (!keys.has(key2)) {
+            batch.skip_effect(item2.e);
+          }
+        }
+        batch.oncommit(commit);
+        batch.ondiscard(discard);
+      } else {
+        commit(batch);
+      }
+    }
+    get(each_array);
+  });
+  var state2 = { effect, items, pending, outrogroups: null, fallback };
+  first_run = false;
+}
+function skip_to_branch(effect) {
+  while (effect !== null && (effect.f & BRANCH_EFFECT) === 0) {
+    effect = effect.next;
+  }
+  return effect;
+}
+function reconcile(state2, array, anchor, flags2, get_key) {
+  var _a2, _b2, _c, _d, _e, _f, _g, _h, _i;
+  var is_animated = (flags2 & EACH_IS_ANIMATED) !== 0;
+  var length = array.length;
+  var items = state2.items;
+  var current = skip_to_branch(state2.effect.first);
+  var seen;
+  var prev = null;
+  var to_animate;
+  var matched = [];
+  var stashed = [];
+  var value;
+  var key;
+  var effect;
+  var i;
+  if (is_animated) {
+    for (i = 0; i < length; i += 1) {
+      value = array[i];
+      key = get_key(value, i);
+      effect = /** @type {EachItem} */
+      items.get(key).e;
+      if ((effect.f & EFFECT_OFFSCREEN) === 0) {
+        (_b2 = (_a2 = effect.nodes) == null ? void 0 : _a2.a) == null ? void 0 : _b2.measure();
+        (to_animate ?? (to_animate = /* @__PURE__ */ new Set())).add(effect);
+      }
+    }
+  }
+  for (i = 0; i < length; i += 1) {
+    value = array[i];
+    key = get_key(value, i);
+    effect = /** @type {EachItem} */
+    items.get(key).e;
+    if (state2.outrogroups !== null) {
+      for (const group of state2.outrogroups) {
+        group.pending.delete(effect);
+        group.done.delete(effect);
+      }
+    }
+    if ((effect.f & INERT) !== 0) {
+      resume_effect(effect);
+      if (is_animated) {
+        (_d = (_c = effect.nodes) == null ? void 0 : _c.a) == null ? void 0 : _d.unfix();
+        (to_animate ?? (to_animate = /* @__PURE__ */ new Set())).delete(effect);
+      }
+    }
+    if ((effect.f & EFFECT_OFFSCREEN) !== 0) {
+      effect.f ^= EFFECT_OFFSCREEN;
+      if (effect === current) {
+        move(effect, null, anchor);
+      } else {
+        var next = prev ? prev.next : current;
+        if (effect === state2.effect.last) {
+          state2.effect.last = effect.prev;
+        }
+        if (effect.prev) effect.prev.next = effect.next;
+        if (effect.next) effect.next.prev = effect.prev;
+        link(state2, prev, effect);
+        link(state2, effect, next);
+        move(effect, next, anchor);
+        prev = effect;
+        matched = [];
+        stashed = [];
+        current = skip_to_branch(prev.next);
+        continue;
+      }
+    }
+    if (effect !== current) {
+      if (seen !== void 0 && seen.has(effect)) {
+        if (matched.length < stashed.length) {
+          var start = stashed[0];
+          var j;
+          prev = start.prev;
+          var a = matched[0];
+          var b = matched[matched.length - 1];
+          for (j = 0; j < matched.length; j += 1) {
+            move(matched[j], start, anchor);
+          }
+          for (j = 0; j < stashed.length; j += 1) {
+            seen.delete(stashed[j]);
+          }
+          link(state2, a.prev, b.next);
+          link(state2, prev, a);
+          link(state2, b, start);
+          current = start;
+          prev = b;
+          i -= 1;
+          matched = [];
+          stashed = [];
+        } else {
+          seen.delete(effect);
+          move(effect, current, anchor);
+          link(state2, effect.prev, effect.next);
+          link(state2, effect, prev === null ? state2.effect.first : prev.next);
+          link(state2, prev, effect);
+          prev = effect;
+        }
+        continue;
+      }
+      matched = [];
+      stashed = [];
+      while (current !== null && current !== effect) {
+        (seen ?? (seen = /* @__PURE__ */ new Set())).add(current);
+        stashed.push(current);
+        current = skip_to_branch(current.next);
+      }
+      if (current === null) {
+        continue;
+      }
+    }
+    if ((effect.f & EFFECT_OFFSCREEN) === 0) {
+      matched.push(effect);
+    }
+    prev = effect;
+    current = skip_to_branch(effect.next);
+  }
+  if (state2.outrogroups !== null) {
+    for (const group of state2.outrogroups) {
+      if (group.pending.size === 0) {
+        destroy_effects(state2, array_from(group.done));
+        (_e = state2.outrogroups) == null ? void 0 : _e.delete(group);
+      }
+    }
+    if (state2.outrogroups.size === 0) {
+      state2.outrogroups = null;
+    }
+  }
+  if (current !== null || seen !== void 0) {
+    var to_destroy = [];
+    if (seen !== void 0) {
+      for (effect of seen) {
+        if ((effect.f & INERT) === 0) {
+          to_destroy.push(effect);
+        }
+      }
+    }
+    while (current !== null) {
+      if ((current.f & INERT) === 0 && current !== state2.fallback) {
+        to_destroy.push(current);
+      }
+      current = skip_to_branch(current.next);
+    }
+    var destroy_length = to_destroy.length;
+    if (destroy_length > 0) {
+      var controlled_anchor = (flags2 & EACH_IS_CONTROLLED) !== 0 && length === 0 ? anchor : null;
+      if (is_animated) {
+        for (i = 0; i < destroy_length; i += 1) {
+          (_g = (_f = to_destroy[i].nodes) == null ? void 0 : _f.a) == null ? void 0 : _g.measure();
+        }
+        for (i = 0; i < destroy_length; i += 1) {
+          (_i = (_h = to_destroy[i].nodes) == null ? void 0 : _h.a) == null ? void 0 : _i.fix();
+        }
+      }
+      pause_effects(state2, to_destroy, controlled_anchor);
+    }
+  }
+  if (is_animated) {
+    queue_micro_task(() => {
+      var _a3, _b3;
+      if (to_animate === void 0) return;
+      for (effect of to_animate) {
+        (_b3 = (_a3 = effect.nodes) == null ? void 0 : _a3.a) == null ? void 0 : _b3.apply();
+      }
+    });
+  }
+}
+function create_item(items, anchor, value, key, index2, render_fn2, flags2, get_collection) {
+  var v = (flags2 & EACH_ITEM_REACTIVE) !== 0 ? (flags2 & EACH_ITEM_IMMUTABLE) === 0 ? /* @__PURE__ */ mutable_source(value, false, false) : source(value) : null;
+  var i = (flags2 & EACH_INDEX_REACTIVE) !== 0 ? source(index2) : null;
+  return {
+    v,
+    i,
+    e: branch(() => {
+      render_fn2(anchor, v ?? value, i ?? index2, get_collection);
+      return () => {
+        items.delete(key);
+      };
+    })
+  };
+}
+function move(effect, next, anchor) {
+  if (!effect.nodes) return;
+  var node = effect.nodes.start;
+  var end = effect.nodes.end;
+  var dest = next && (next.f & EFFECT_OFFSCREEN) === 0 ? (
+    /** @type {EffectNodes} */
+    next.nodes.start
+  ) : anchor;
+  while (node !== null) {
+    var next_node = (
+      /** @type {TemplateNode} */
+      /* @__PURE__ */ get_next_sibling(node)
+    );
+    dest.before(node);
+    if (node === end) {
+      return;
+    }
+    node = next_node;
+  }
+}
+function link(state2, prev, next) {
+  if (prev === null) {
+    state2.effect.first = next;
+  } else {
+    prev.next = next;
+  }
+  if (next === null) {
+    state2.effect.last = prev;
+  } else {
+    next.prev = prev;
+  }
+}
 function onMount(fn) {
   if (component_context === null) {
     lifecycle_outside_component();
@@ -3445,54 +3881,38 @@ function setupTheme() {
   document.documentElement.classList.toggle("dark", dark);
 }
 export {
-  delegate as A,
-  BRANCH_EFFECT as B,
-  state as C,
-  DESTROYED as D,
-  EACH_INDEX_REACTIVE as E,
-  proxy as F,
-  onMount as G,
-  if_block as H,
-  INERT as I,
-  template_effect as J,
-  delegated as K,
-  append as L,
-  pop as M,
-  sibling as N,
-  from_html as O,
-  push as P,
-  child as Q,
-  set_text as R,
-  set as S,
-  setupTheme as T,
-  mount as U,
-  CLASS_CACHE as V,
-  text as W,
-  current_batch as a,
-  block as b,
-  create_text as c,
-  branch as d,
-  each_key_duplicate as e,
-  derived_safe_equal as f,
+  ATTRIBUTES_CACHE as A,
+  index as B,
+  CLASS_CACHE as C,
+  comment as D,
+  first_child as E,
+  text as F,
+  NAMESPACE_HTML as N,
+  template_effect as a,
+  delegated as b,
+  current_batch as c,
+  delegate as d,
+  append as e,
+  pop as f,
   get as g,
-  source as h,
-  internal_set as i,
-  EACH_ITEM_REACTIVE as j,
-  EACH_ITEM_IMMUTABLE as k,
-  is_array as l,
-  mutable_source as m,
-  array_from as n,
-  EFFECT_OFFSCREEN as o,
-  pause_effect as p,
-  clear_text_content as q,
-  resume_effect as r,
-  should_defer_append as s,
-  move_effect as t,
-  destroy_effect as u,
-  get_next_sibling as v,
-  listen_to_event_and_reset_event as w,
-  tick as x,
-  untrack as y,
-  render_effect as z
+  sibling as h,
+  if_block as i,
+  from_html as j,
+  push as k,
+  listen_to_event_and_reset_event as l,
+  child as m,
+  set_text as n,
+  onMount as o,
+  proxy as p,
+  set as q,
+  render_effect as r,
+  state as s,
+  tick as t,
+  untrack as u,
+  each as v,
+  setupTheme as w,
+  mount as x,
+  get_prototype_of as y,
+  get_descriptors as z
 };
-//# sourceMappingURL=theme-DkLCqHxA.js.map
+//# sourceMappingURL=theme-B3OQhyhs.js.map

@@ -71,17 +71,72 @@ function callLLM(prompt) {
   });
 }
 
-// ─── PROMPT BUILDERS ──────────────────────────────────────────────────────────
-const SYSTEM =
-  'You are a writing assistant for Vietnamese students learning academic English. ' +
-  'Respond with ONLY a valid JSON array — no markdown fences, no explanation, ' +
-  'no code blocks, no extra text before or after the array.';
+// ─── MASK DEFINITIONS ─────────────────────────────────────────────────────────
+const MASKS = {
+  academic: {
+    system:
+      'You are a writing assistant for Vietnamese students learning academic English. ' +
+      'Respond with ONLY a valid JSON array — no markdown fences, no explanation, ' +
+      'no code blocks, no extra text before or after the array.',
+    translateCtx: 'suitable for academic essay writing',
+    synonymsCtx:  'suitable for academic writing',
+    analyzeNote:  'for academic usage, with formal grammar labels and scholarly collocations',
+  },
+  office: {
+    system:
+      'You are a writing assistant helping Vietnamese professionals write formal business English. ' +
+      'Respond with ONLY a valid JSON array — no markdown fences, no explanation, ' +
+      'no code blocks, no extra text before or after the array.',
+    translateCtx: 'suitable for professional business emails and corporate documents',
+    synonymsCtx:  'suitable for formal workplace communication and business writing',
+    analyzeNote:  'for professional email or document writing, highlighting formality level and business context',
+  },
+  writer: {
+    system:
+      'You are a writing assistant for Vietnamese creative writers expressing themselves in English. ' +
+      'Respond with ONLY a valid JSON array — no markdown fences, no explanation, ' +
+      'no code blocks, no extra text before or after the array.',
+    translateCtx: 'suitable for creative and literary expression, preferring vivid and evocative phrasing',
+    synonymsCtx:  'with literary flair, showing varying connotations, tone, and stylistic nuance',
+    analyzeNote:  'for literary writing, including connotations, emotional tone, imagery, and stylistic uses',
+  },
+  learner: {
+    system:
+      'You are a friendly language tutor helping Vietnamese learners improve their English step by step. ' +
+      'Respond with ONLY a valid JSON array — no markdown fences, no explanation, ' +
+      'no code blocks, no extra text before or after the array.',
+    translateCtx: 'simple and clear for intermediate English learners, avoiding complex vocabulary',
+    synonymsCtx:  'with clear notes on usage differences, common mistakes to avoid, and difficulty level',
+    analyzeNote:  'for language learners, including grammar tips, common sentence patterns, and memory aids',
+  },
+  chat: {
+    system:
+      'You are a casual writing assistant helping Vietnamese users communicate naturally in English online. ' +
+      'Respond with ONLY a valid JSON array — no markdown fences, no explanation, ' +
+      'no code blocks, no extra text before or after the array.',
+    translateCtx: 'casual and informal, suitable for chat messages, social media posts, and comment sections',
+    synonymsCtx:  'informal or colloquial alternatives, including internet slang and reaction phrases where appropriate',
+    analyzeNote:  'for everyday online chat, including informal usage, slang, internet culture references, and emoji-compatible phrases',
+  },
+  dev: {
+    system:
+      'You are a technical writing assistant helping Vietnamese developers write precise, clear English. ' +
+      'Respond with ONLY a valid JSON array — no markdown fences, no explanation, ' +
+      'no code blocks, no extra text before or after the array.',
+    translateCtx: 'suitable for technical documentation, code comments, README files, or developer communication',
+    synonymsCtx:  'suitable for technical writing, prioritizing precision and unambiguous alternatives',
+    analyzeNote:  'for technical documentation, focusing on formal definitions, precision, and common developer usage',
+  },
+};
 
-function buildPrompt(mode, phrase, context) {
+// ─── PROMPT BUILDERS ──────────────────────────────────────────────────────────
+function buildPrompt(mode, phrase, context, mask) {
+  const m = MASKS[mask] || MASKS.academic;
+
   if (mode === 'translate') {
     return (
-      `${SYSTEM}\n\n` +
-      `Suggest 3 English translations for the Vietnamese phrase below, suitable for academic essay writing.\n` +
+      `${m.system}\n\n` +
+      `Suggest 3 English translations for the Vietnamese phrase below, ${m.translateCtx}.\n` +
       `Vietnamese phrase: "${phrase}"\n` +
       (context ? `Surrounding context: "${context}"\n` : '') +
       `\nReturn exactly 3 objects:\n` +
@@ -90,8 +145,8 @@ function buildPrompt(mode, phrase, context) {
   }
   if (mode === 'synonyms') {
     return (
-      `${SYSTEM}\n\n` +
-      `Suggest 4 synonyms for the English word/phrase below, suitable for academic writing.\n` +
+      `${m.system}\n\n` +
+      `Suggest 4 synonyms for the English word/phrase below, ${m.synonymsCtx}.\n` +
       `Word/phrase: "${phrase}"\n` +
       `\nReturn exactly 4 objects:\n` +
       `[{"phrase":"<synonym>","breakdown":"<word (part of speech) /pronunciation/>","meaning":"<Vietnamese meaning>"},...]`
@@ -99,8 +154,8 @@ function buildPrompt(mode, phrase, context) {
   }
   if (mode === 'analyze') {
     return (
-      `${SYSTEM}\n\n` +
-      `Analyze the English word below. Provide 4 entries covering:\n` +
+      `${m.system}\n\n` +
+      `Analyze the English word below, ${m.analyzeNote}. Provide 4 entries covering:\n` +
       `1. Base form with pronunciation and part of speech\n` +
       `2. Common collocation or prepositional phrase\n` +
       `3. Adjective or adverb derivative\n` +
@@ -127,7 +182,7 @@ app.get('/health', (_req, res) => {
 });
 
 app.post('/suggest', async (req, res) => {
-  const { mode, phrase, context = '' } = req.body;
+  const { mode, phrase, context = '', mask = 'academic' } = req.body;
 
   if (!mode || !phrase) {
     return res.status(400).json({ error: '"mode" and "phrase" are required' });
@@ -135,7 +190,7 @@ app.post('/suggest', async (req, res) => {
 
   let prompt;
   try {
-    prompt = buildPrompt(mode, phrase, context);
+    prompt = buildPrompt(mode, phrase, context, mask);
   } catch (e) {
     return res.status(400).json({ error: e.message });
   }

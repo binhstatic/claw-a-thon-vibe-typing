@@ -74,11 +74,11 @@ function offsetToRange(root, start, end) {
   range.setEnd(endPos.node, endPos.offset);
   return range;
 }
-async function callAgent(baseUrl, mode, phrase, context, signal) {
+async function callAgent(baseUrl, mode, phrase, context, mask, signal) {
   const res = await fetch(`${baseUrl}/suggest`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mode, phrase, context }),
+    body: JSON.stringify({ mode, phrase, context, mask }),
     signal
   });
   if (!res.ok) throw new Error(`Agent HTTP ${res.status}`);
@@ -642,6 +642,7 @@ async function detect(el) {
       match.mode,
       match.phrase,
       match.context,
+      config.mask ?? "academic",
       signal
     );
     if (signal.aborted) return;
@@ -696,4 +697,4 @@ function attachListeners() {
   }, { passive: true, capture: true });
 }
 init().catch(console.error);
-//# sourceMappingURL=index.ts-cIiVjv5y.js.map
+//# sourceMappingURL=index.ts-FK5UeXkS.js.map
