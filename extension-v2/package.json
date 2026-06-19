@@ -1,0 +1,23 @@
+{
+  "name": "vibe-typing",
+  "version": "0.3.0",
+  "type": "module",
+  "scripts": {
+    "prepare": "cp -r ../extension/icons public/ 2>/dev/null || true",
+    "dev": "vite",
+    "build": "vite build",
+    "zip": "npm run build && cd build && zip -r ../vibe-typing.zip . && cd .."
+  },
+  "dependencies": {
+    "svelte": "^5.0.0"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0-next.6",
+    "@tailwindcss/vite": "^4.1.4",
+    "@types/chrome": "^0.0.270",
+    "tailwindcss": "^4.1.4",
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0"
+  }
+}
