@@ -1,2 +1,5 @@
 .greennode.json
 .agentbase/
+node_modules/
+**/node_modules/
+

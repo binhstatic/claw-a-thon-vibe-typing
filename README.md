@@ -1,23 +1,23 @@
 # Vibe Typing
 
-An AI writing assistant that helps Vietnamese students write academic English — directly inside any browser text field, without switching tabs or tools.
+An AI writing assistant that helps Vietnamese professionals write in English — directly inside any browser text field, without switching tabs or tools.
 
 ## How it works
 
-Type a trigger pattern ending with a period (`.`) and a suggestion dropdown appears instantly at your cursor:
+Type a trigger pattern ending with a period (`.`) and a suggestion popup appears instantly:
 
 | Trigger | Mode | Example |
 |---------|------|---------|
-| `@cụm tiếng Việt.` | Translate | `…this policy @dẫn đến tâm lý hoang mang.` → 3 English suggestions |
-| `!!English word.` | Synonyms | `a very !!important. issue` → 4 academic synonyms |
-| `#word.` | Analyze | `#impact.` → pronunciation, collocations, derivatives, idioms |
+| `@cụm tiếng Việt.` | Translate | `@dẫn đến tâm lý hoang mang.` → English suggestions with context |
+| `!!English word.` | Synonyms | `!!important.` → academic synonyms |
+| `#word.` | Analyze | `#impact.` → pronunciation, collocations, meaning |
 
-Click a suggestion to insert it — the trigger is replaced automatically.
+Click a suggestion to replace the trigger text — works in Gmail, Teams, Notion, Slack, and any other web text field.
 
 ## Architecture
 
 ```
-Chrome Extension / Web Playground
+Chrome Extension (extension-v2/)
         │
         │  POST /suggest  {mode, phrase, context}
         ▼
@@ -30,13 +30,13 @@ Chrome Extension / Web Playground
   model: google/gemma-4-31b-it
 ```
 
-### Components
+### Repository structure
 
 | Folder | What it is |
 |--------|------------|
-| `extension/` | Chrome Extension (Manifest V3) — content script, popup |
-| `web/` | Static web playground — same trigger logic, runs in the browser |
-| `agent/` | Node.js HTTP bridge — receives `/suggest` requests, calls the LLM |
+| `extension-v2/` | Chrome Extension MV3 — TypeScript + Svelte 5 + Vite |
+| `agent/` | Node.js HTTP bridge — receives `/suggest`, calls the LLM |
+| `web/` | Static web playground — same trigger logic, no build needed |
 
 ## Getting started
 
@@ -51,18 +51,27 @@ npm start
 # Agent runs on http://localhost:8080
 ```
 
-### 2. Cài extension thủ công (Manual Installation)
-
-Extension chưa publish lên Chrome Web Store, nên cần cài bằng cách load thủ công (Developer mode).
-
-#### Bước 1 — Tải source code
-
-Clone repo về máy hoặc tải ZIP:
+### 2. Build the extension
 
 ```bash
-git clone <repo-url>
-# hoặc tải ZIP từ GitHub → Extract → nhớ đường dẫn thư mục extension/
+cd extension-v2
+npm install
+npm run build
+# Output: extension-v2/build/
 ```
+
+To create a ZIP for the Chrome Web Store:
+
+```bash
+npm run zip
+# Output: extension-v2/vibe-typing.zip
+```
+
+### 3. Cài extension thủ công (Manual Installation)
+
+#### Bước 1 — Build
+
+Chạy lệnh build ở trên. Kết quả nằm trong `extension-v2/build/`.
 
 #### Bước 2 — Mở trang quản lý extension
 
@@ -71,26 +80,35 @@ git clone <repo-url>
 | Chrome | `chrome://extensions` |
 | Edge | `edge://extensions` |
 | Brave | `brave://extensions` |
-| Arc | `chrome://extensions` (mở từ menu → Extensions) |
+| Arc | `chrome://extensions` |
 
 #### Bước 3 — Bật Developer mode
 
-Gạt công tắc **Developer mode** (góc trên bên phải) sang **ON**.
+Gạt **Developer mode** (góc trên bên phải) sang **ON**.
 
 #### Bước 4 — Load unpacked
 
 1. Click **Load unpacked**
-2. Chọn thư mục `extension/` trong repo (thư mục chứa `manifest.json`)
+2. Chọn thư mục `extension-v2/build/` (thư mục chứa `manifest.json`)
 3. Click **Select Folder** / **Open**
 
-Extension **Vibe Typing — Smart Translator** sẽ xuất hiện trong danh sách và icon hiện ở thanh toolbar.
+Extension **Vibe Typing — Smart Translator** sẽ xuất hiện trong danh sách.
 
-#### Lưu ý khi cập nhật extension
+#### Bước 5 — Cấu hình
 
-Mỗi lần pull code mới hoặc sửa file trong `extension/`, cần reload lại extension:
-- Vào trang extensions → tìm **Vibe Typing** → click icon **Reload** (↻)
+Click icon Vibe Typing trên toolbar → **Settings** → nhập URL của agent vào ô **API Base URL**.
 
-### 3. Run the web playground locally
+#### Cập nhật extension
+
+Mỗi lần sửa code trong `extension-v2/src/`:
+
+```bash
+cd extension-v2 && npm run build
+```
+
+Sau đó vào trang extensions → tìm **Vibe Typing** → click **Reload** (↻).
+
+### 4. Run the web playground
 
 ```bash
 cd web
@@ -100,16 +118,14 @@ python3 -m http.server 5050
 
 ## Deployment
 
-The agent and web service are deployed as Docker containers on **GreenNode AgentBase Runtime**.
-
-### Agent
+The agent is deployed as a Docker container on **GreenNode AgentBase Runtime**.
 
 ```bash
 # Build & push
 docker build --platform linux/amd64 -t <registry>/vibe-typing-agent:latest agent/
 docker push <registry>/vibe-typing-agent:latest
 
-# Deploy (via AgentBase CLI)
+# Deploy
 runtime create --name vibe-typing-agent --image <registry>/vibe-typing-agent:latest \
   --env-file agent/.env --flavor runtime-s2-general-2x4
 ```
@@ -118,17 +134,7 @@ The agent exposes:
 - `GET /health` — liveness check
 - `POST /suggest` — main inference endpoint
 
-### Web
-
-```bash
-docker build --platform linux/amd64 -t <registry>/vibe-typing-web:latest web/
-docker push <registry>/vibe-typing-web:latest
-
-runtime create --name vibe-typing-web --image <registry>/vibe-typing-web:latest \
-  --flavor runtime-s2-general-2x4
-```
-
-After deployment, update `extension/config.js` and `web/config.js` with the live endpoint URL.
+After deployment, set the live endpoint URL in the extension's Settings page.
 
 ## Environment variables
 
@@ -139,11 +145,13 @@ After deployment, update `extension/config.js` and `web/config.js` with the live
 | `LLM_MODEL` | No | Model name (default: `google/gemma-4-31b-it`) |
 | `PORT` | No | Server port (default: `8080`) |
 
-Copy `agent/.env.example` to `agent/.env` and fill in the values. Never commit `.env`.
+Copy `agent/.env.example` to `agent/.env`. Never commit `.env`.
 
 ## API reference
 
 ### `POST /suggest`
+
+Request:
 
 ```json
 {
@@ -166,3 +174,13 @@ Response:
   ]
 }
 ```
+
+## Extension tech stack
+
+| Tool | Version | Role |
+|------|---------|------|
+| TypeScript | 5.x | Type-safe content script and background service worker |
+| Svelte 5 | 5.x | Options page and popup UI |
+| Vite | 5.x | Build tool |
+| @crxjs/vite-plugin | 2.x | MV3 manifest + HMR wiring |
+| Tailwind CSS | 4.x | Options page styling |
