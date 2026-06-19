@@ -134,3 +134,36 @@
 }
 
 .vt-lp-dismiss:hover { border-color: #9ca3af; color: #374151; }
+
+/* ── Loading popup ── */
+.vt-lp-loading-body {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 16px 16px;
+  min-height: 50px;
+}
+
+.vt-lp-loading-word {
+  font-size: 14px;
+  font-weight: 700;
+  color: #4f46e5;
+  opacity: 1;
+  transition: opacity 0.22s ease;
+}
+
+.vt-lp-loading-word.vt-fading {
+  opacity: 0;
+}
+
+.vt-lp-loading-suffix {
+  font-size: 14px;
+  font-weight: 400;
+  color: #a5b4fc;
+  animation: vt-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes vt-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.15; }
+}

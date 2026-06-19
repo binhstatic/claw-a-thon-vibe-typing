@@ -7,13 +7,80 @@ const MODE_LABELS: Record<string, string> = {
   analyze: '🔬 Phân tích từ',
 };
 
+const LOADING_WORDS: Record<string, string[]> = {
+  translate: ['Translating', 'Interpreting', 'Rephrasing', 'Contextualizing', 'Rendering', 'Searching', 'Expressing', 'Converting'],
+  synonyms:  ['Searching', 'Exploring', 'Scanning', 'Sifting', 'Gathering', 'Browsing', 'Hunting', 'Discovering'],
+  analyze:   ['Analyzing', 'Dissecting', 'Examining', 'Parsing', 'Unpacking', 'Investigating', 'Studying', 'Exploring'],
+};
+
 let popup: HTMLElement | null = null;
+let loadingPopup: HTMLElement | null = null;
+let loadingInterval: ReturnType<typeof setInterval> | null = null;
 
 function esc(s: string): string {
   return String(s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
+function mountPopup(p: HTMLElement, anchorRect: DOMRect): void {
+  const sx = window.scrollX;
+  const sy = window.scrollY;
+  p.style.cssText = `position:absolute;left:${anchorRect.left + sx}px;top:${anchorRect.bottom + sy + 4}px;`;
+  document.body.appendChild(p);
+  requestAnimationFrame(() => {
+    p.classList.add('vt-lint-popup-open');
+    const pr = p.getBoundingClientRect();
+    if (pr.bottom > window.innerHeight - 8) {
+      p.style.top = `${anchorRect.top + sy - pr.height - 4}px`;
+    }
+    if (pr.right > window.innerWidth - 8) {
+      p.style.left = `${Math.max(8, window.innerWidth - pr.width - 8) + sx}px`;
+    }
+  });
+}
+
+// ─── Loading popup ────────────────────────────────────────────────────────────
+
+export function showLoadingPopup(anchorRect: DOMRect, match: TriggerMatch): void {
+  hideLoadingPopup();
+
+  const words = LOADING_WORDS[match.mode] ?? ['Thinking', 'Processing', 'Searching', 'Pondering', 'Exploring', 'Reflecting'];
+  let idx = 0;
+
+  const p = document.createElement('div');
+  p.className = 'vt-lint-popup';
+  p.innerHTML = `
+    <div class="vt-lp-loading-body">
+      <span class="vt-lp-loading-word">${words[0]}</span>
+      <span class="vt-lp-loading-suffix">…</span>
+    </div>
+  `.trim();
+
+  mountPopup(p, anchorRect);
+  loadingPopup = p;
+
+  const wordEl = p.querySelector<HTMLElement>('.vt-lp-loading-word')!;
+  loadingInterval = setInterval(() => {
+    wordEl.classList.add('vt-fading');
+    setTimeout(() => {
+      idx = (idx + 1) % words.length;
+      wordEl.textContent = words[idx];
+      wordEl.classList.remove('vt-fading');
+    }, 220);
+  }, 1600);
+}
+
+export function hideLoadingPopup(): void {
+  if (loadingInterval) { clearInterval(loadingInterval); loadingInterval = null; }
+  if (!loadingPopup) return;
+  loadingPopup.classList.remove('vt-lint-popup-open');
+  const old = loadingPopup;
+  setTimeout(() => old.parentNode?.removeChild(old), 160);
+  loadingPopup = null;
+}
+
+// ─── Suggestion popup ─────────────────────────────────────────────────────────
 
 export function hideSuggestionPopup(): void {
   if (!popup) return;
@@ -56,10 +123,6 @@ export function showSuggestionPopup(
     </div>
   `.trim();
 
-  const sx = window.scrollX;
-  const sy = window.scrollY;
-  p.style.cssText = `position:absolute;left:${anchorRect.left + sx}px;top:${anchorRect.bottom + sy + 4}px;`;
-
   p.querySelector('.vt-lp-close')!.addEventListener('mousedown', ev => {
     ev.preventDefault();
     hideSuggestionPopup();
@@ -81,19 +144,8 @@ export function showSuggestionPopup(
     });
   });
 
-  document.body.appendChild(p);
+  mountPopup(p, anchorRect);
   popup = p;
-
-  requestAnimationFrame(() => {
-    p.classList.add('vt-lint-popup-open');
-    const pr = p.getBoundingClientRect();
-    if (pr.bottom > window.innerHeight - 8) {
-      p.style.top = `${anchorRect.top + sy - pr.height - 4}px`;
-    }
-    if (pr.right > window.innerWidth - 8) {
-      p.style.left = `${Math.max(8, window.innerWidth - pr.width - 8) + sx}px`;
-    }
-  });
 }
 
 export const isSuggestionPopupOpen = (): boolean => popup !== null;

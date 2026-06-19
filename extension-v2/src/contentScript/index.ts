@@ -11,6 +11,8 @@ import { HighlightRenderer } from './highlightRenderer';
 import {
   showSuggestionPopup,
   hideSuggestionPopup,
+  showLoadingPopup,
+  hideLoadingPopup,
   isSuggestionPopupOpen,
   suggestionPopupContains,
 } from './suggestionPopup';
@@ -53,6 +55,7 @@ async function init(): Promise<void> {
 function clearTriggerState(): void {
   triggerRenderer.clear();
   hideSuggestionPopup();
+  hideLoadingPopup();
   readySuggestions = null;
   currentMatch = null;
   currentTarget = null;
@@ -140,9 +143,11 @@ async function detect(el: Element): Promise<void> {
   readySuggestions = null;
   hideSuggestionPopup();
 
-  // Show loading underline immediately (Harper style)
+  // Show loading underline + loading popup immediately
   const rects = getSpanClientRects(el, match.matchStart, match.matchStart + match.fullMatch.length);
   triggerRenderer.update(rects.map((r, i) => ({ rects: [r], lintIndex: i })), false);
+  const anchorRect = rects[0] ?? el.getBoundingClientRect();
+  showLoadingPopup(anchorRect, match);
 
   try {
     const suggestions = await callAgent(
@@ -160,9 +165,8 @@ async function detect(el: Element): Promise<void> {
     readySuggestions = suggestions;
     refreshHighlight(true);
 
-    // Auto-show popup immediately (user already expressed intent by typing the trigger)
-    const rects = getSpanClientRects(el, match.matchStart, match.matchStart + match.fullMatch.length);
-    const anchorRect = rects[0] ?? el.getBoundingClientRect();
+    // Replace loading popup with suggestion popup
+    hideLoadingPopup();
     showSuggestionPopup(
       anchorRect,
       match,

@@ -238,9 +238,70 @@ const MODE_LABELS = {
   synonyms: "🔁 Từ đồng nghĩa",
   analyze: "🔬 Phân tích từ"
 };
+const LOADING_WORDS = {
+  translate: ["Translating", "Interpreting", "Rephrasing", "Contextualizing", "Rendering", "Searching", "Expressing", "Converting"],
+  synonyms: ["Searching", "Exploring", "Scanning", "Sifting", "Gathering", "Browsing", "Hunting", "Discovering"],
+  analyze: ["Analyzing", "Dissecting", "Examining", "Parsing", "Unpacking", "Investigating", "Studying", "Exploring"]
+};
 let popup = null;
+let loadingPopup = null;
+let loadingInterval = null;
 function esc(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function mountPopup(p, anchorRect) {
+  const sx = window.scrollX;
+  const sy = window.scrollY;
+  p.style.cssText = `position:absolute;left:${anchorRect.left + sx}px;top:${anchorRect.bottom + sy + 4}px;`;
+  document.body.appendChild(p);
+  requestAnimationFrame(() => {
+    p.classList.add("vt-lint-popup-open");
+    const pr = p.getBoundingClientRect();
+    if (pr.bottom > window.innerHeight - 8) {
+      p.style.top = `${anchorRect.top + sy - pr.height - 4}px`;
+    }
+    if (pr.right > window.innerWidth - 8) {
+      p.style.left = `${Math.max(8, window.innerWidth - pr.width - 8) + sx}px`;
+    }
+  });
+}
+function showLoadingPopup(anchorRect, match) {
+  hideLoadingPopup();
+  const words = LOADING_WORDS[match.mode] ?? ["Thinking", "Processing", "Searching", "Pondering", "Exploring", "Reflecting"];
+  let idx = 0;
+  const p = document.createElement("div");
+  p.className = "vt-lint-popup";
+  p.innerHTML = `
+    <div class="vt-lp-loading-body">
+      <span class="vt-lp-loading-word">${words[0]}</span>
+      <span class="vt-lp-loading-suffix">…</span>
+    </div>
+  `.trim();
+  mountPopup(p, anchorRect);
+  loadingPopup = p;
+  const wordEl = p.querySelector(".vt-lp-loading-word");
+  loadingInterval = setInterval(() => {
+    wordEl.classList.add("vt-fading");
+    setTimeout(() => {
+      idx = (idx + 1) % words.length;
+      wordEl.textContent = words[idx];
+      wordEl.classList.remove("vt-fading");
+    }, 220);
+  }, 1600);
+}
+function hideLoadingPopup() {
+  if (loadingInterval) {
+    clearInterval(loadingInterval);
+    loadingInterval = null;
+  }
+  if (!loadingPopup) return;
+  loadingPopup.classList.remove("vt-lint-popup-open");
+  const old = loadingPopup;
+  setTimeout(() => {
+    var _a;
+    return (_a = old.parentNode) == null ? void 0 : _a.removeChild(old);
+  }, 160);
+  loadingPopup = null;
 }
 function hideSuggestionPopup() {
   if (!popup) return;
@@ -271,9 +332,6 @@ function showSuggestionPopup(anchorRect, match, suggestions, onApply, onDismiss)
       <button class="vt-lp-dismiss">Bỏ qua</button>
     </div>
   `.trim();
-  const sx = window.scrollX;
-  const sy = window.scrollY;
-  p.style.cssText = `position:absolute;left:${anchorRect.left + sx}px;top:${anchorRect.bottom + sy + 4}px;`;
   p.querySelector(".vt-lp-close").addEventListener("mousedown", (ev) => {
     ev.preventDefault();
     hideSuggestionPopup();
@@ -292,18 +350,8 @@ function showSuggestionPopup(anchorRect, match, suggestions, onApply, onDismiss)
       hideSuggestionPopup();
     });
   });
-  document.body.appendChild(p);
+  mountPopup(p, anchorRect);
   popup = p;
-  requestAnimationFrame(() => {
-    p.classList.add("vt-lint-popup-open");
-    const pr = p.getBoundingClientRect();
-    if (pr.bottom > window.innerHeight - 8) {
-      p.style.top = `${anchorRect.top + sy - pr.height - 4}px`;
-    }
-    if (pr.right > window.innerWidth - 8) {
-      p.style.left = `${Math.max(8, window.innerWidth - pr.width - 8) + sx}px`;
-    }
-  });
 }
 const isSuggestionPopupOpen = () => popup !== null;
 const suggestionPopupContains = (el) => !!popup && !!el && popup.contains(el);
@@ -519,6 +567,7 @@ async function init() {
 function clearTriggerState() {
   triggerRenderer.clear();
   hideSuggestionPopup();
+  hideLoadingPopup();
   readySuggestions = null;
   currentMatch = null;
   currentTarget = null;
@@ -585,6 +634,8 @@ async function detect(el) {
   hideSuggestionPopup();
   const rects = getSpanClientRects(el, match.matchStart, match.matchStart + match.fullMatch.length);
   triggerRenderer.update(rects.map((r, i) => ({ rects: [r], lintIndex: i })), false);
+  const anchorRect = rects[0] ?? el.getBoundingClientRect();
+  showLoadingPopup(anchorRect, match);
   try {
     const suggestions = await callAgent(
       config.agentBaseUrl,
@@ -600,8 +651,7 @@ async function detect(el) {
     }
     readySuggestions = suggestions;
     refreshHighlight(true);
-    const rects2 = getSpanClientRects(el, match.matchStart, match.matchStart + match.fullMatch.length);
-    const anchorRect = rects2[0] ?? el.getBoundingClientRect();
+    hideLoadingPopup();
     showSuggestionPopup(
       anchorRect,
       match,
@@ -646,4 +696,4 @@ function attachListeners() {
   }, { passive: true, capture: true });
 }
 init().catch(console.error);
-//# sourceMappingURL=index.ts-BE3s3qwX.js.map
+//# sourceMappingURL=index.ts-cIiVjv5y.js.map
