@@ -3,7 +3,7 @@ import { defineManifest } from '@crxjs/vite-plugin';
 export default defineManifest({
   manifest_version: 3,
   name: 'Vibe Typing — Smart Translator',
-  version: '0.3.0',
+  version: '0.3.1',
   description: 'AI-powered translation and vocabulary suggestions while you type.',
   permissions: ['storage', 'tabs', 'activeTab'],
   host_permissions: ['<all_urls>'],
