@@ -42,6 +42,13 @@ async function init(): Promise<void> {
   config = cfg;
   if (!enabled) return;
 
+  // Sync config changes (e.g. mask) made in the popup without requiring a page reload
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && 'config' in changes && config) {
+      config = { ...config, ...changes.config.newValue };
+    }
+  });
+
   attachListeners();
 
   // Keep-alive: prevent MV3 service worker from being suspended

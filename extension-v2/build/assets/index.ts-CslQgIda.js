@@ -558,6 +558,11 @@ async function init() {
   ]);
   config = cfg;
   if (!enabled) return;
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && "config" in changes && config) {
+      config = { ...config, ...changes.config.newValue };
+    }
+  });
   attachListeners();
   setInterval(() => {
     ProtocolClient.getConfig().catch(() => {
@@ -697,4 +702,4 @@ function attachListeners() {
   }, { passive: true, capture: true });
 }
 init().catch(console.error);
-//# sourceMappingURL=index.ts-FK5UeXkS.js.map
+//# sourceMappingURL=index.ts-CslQgIda.js.map
