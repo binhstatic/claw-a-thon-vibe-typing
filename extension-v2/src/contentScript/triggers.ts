@@ -15,9 +15,9 @@ interface Trigger {
 }
 
 const TRIGGERS: Trigger[] = [
-  { re: /@([^@\n]{2,80})\.$/, mode: 'translate' },
-  { re: /!!([^!\n]{2,80})\.$/, mode: 'synonyms' },
-  { re: /#([^#\n]{2,60})\.$/, mode: 'analyze' },
+  { re: /@([^@\n]{2,500})\.$/, mode: 'translate' },
+  { re: /!!([^!\n]{2,500})\.$/, mode: 'synonyms' },
+  { re: /#([^#\n]{2,500})\.$/, mode: 'analyze' },
 ];
 
 export function matchTrigger(
