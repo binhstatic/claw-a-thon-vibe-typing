@@ -7,6 +7,7 @@ const MODE_LABELS: Record<string, string> = {
   translate: '🌐 Gợi ý tiếng Anh',
   synonyms: '🔁 Từ đồng nghĩa',
   analyze: '🔬 Phân tích từ',
+  lint: '✅ Kiểm tra ngữ pháp',
 };
 
 let dropdown: HTMLElement | null = null;

@@ -126,6 +126,10 @@
         <span class="shrink-0 bg-violet-100 text-violet-800 font-mono text-[12px] font-bold px-2 py-0.5 rounded min-w-[36px] text-center">#</span>
         <span class="text-[12.5px] text-gray-700 leading-snug">Gõ <em class="text-violet-700 not-italic font-medium">#[từ].</em> → <em class="text-violet-700 not-italic font-medium">phân tích từ</em></span>
       </div>
+      <div class="flex items-start gap-2.5">
+        <span class="shrink-0 bg-violet-100 text-violet-800 font-mono text-[12px] font-bold px-2 py-0.5 rounded min-w-[36px] text-center">/lint</span>
+        <span class="text-[12.5px] text-gray-700 leading-snug">Gõ <em class="text-violet-700 not-italic font-medium">/lint[câu văn]/</em> → <em class="text-violet-700 not-italic font-medium">kiểm tra ngữ pháp</em></span>
+      </div>
     </div>
   </div>
 

@@ -21,6 +21,7 @@ export interface Config {
   enableTranslate: boolean;
   enableSynonyms: boolean;
   enableAnalyze: boolean;
+  enableLint: boolean;
   mask: MaskId;
 }
 
@@ -30,6 +31,7 @@ export const DEFAULT_CONFIG: Config = {
   enableTranslate: true,
   enableSynonyms: true,
   enableAnalyze: true,
+  enableLint: true,
   mask: 'academic',
 };
 

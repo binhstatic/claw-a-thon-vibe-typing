@@ -7,6 +7,7 @@
   let enableTranslate = $state(true);
   let enableSynonyms = $state(true);
   let enableAnalyze = $state(true);
+  let enableLint = $state(true);
   let defaultEnabled = $state(true);
   let domains = $state<string[]>([]);
 
@@ -23,6 +24,7 @@
     enableTranslate = cfg.enableTranslate;
     enableSynonyms = cfg.enableSynonyms;
     enableAnalyze = cfg.enableAnalyze;
+    enableLint = cfg.enableLint;
     defaultEnabled = def;
     domains = doms;
   }
@@ -34,6 +36,7 @@
       enableTranslate,
       enableSynonyms,
       enableAnalyze,
+      enableLint,
     };
     await Promise.all([
       ProtocolClient.setConfig(cfg),
@@ -140,6 +143,17 @@
             </div>
           </div>
           <input type="checkbox" bind:checked={enableAnalyze} class="w-4 h-4 accent-indigo-600 cursor-pointer" />
+        </label>
+
+        <label class="flex items-center justify-between cursor-pointer">
+          <div class="flex items-center gap-3">
+            <span class="bg-violet-100 text-violet-800 font-mono text-xs font-bold px-2 py-0.5 rounded min-w-[36px] text-center">/lint</span>
+            <div>
+              <div class="font-medium text-gray-700">Lint</div>
+              <div class="text-xs text-gray-400">/lint[câu văn]/ → kiểm tra ngữ pháp & chính tả</div>
+            </div>
+          </div>
+          <input type="checkbox" bind:checked={enableLint} class="w-4 h-4 accent-indigo-600 cursor-pointer" />
         </label>
       </div>
     </section>

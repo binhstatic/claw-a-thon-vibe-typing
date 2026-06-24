@@ -5,12 +5,14 @@ const MODE_LABELS: Record<string, string> = {
   translate: '🌐 Gợi ý tiếng Anh',
   synonyms: '🔁 Từ đồng nghĩa',
   analyze: '🔬 Phân tích từ',
+  lint: '✅ Kiểm tra ngữ pháp',
 };
 
 const LOADING_WORDS: Record<string, string[]> = {
   translate: ['Translating', 'Interpreting', 'Rephrasing', 'Contextualizing', 'Rendering', 'Searching', 'Expressing', 'Converting'],
   synonyms:  ['Searching', 'Exploring', 'Scanning', 'Sifting', 'Gathering', 'Browsing', 'Hunting', 'Discovering'],
   analyze:   ['Analyzing', 'Dissecting', 'Examining', 'Parsing', 'Unpacking', 'Investigating', 'Studying', 'Exploring'],
+  lint:      ['Checking', 'Proofreading', 'Reviewing', 'Scanning', 'Validating', 'Inspecting', 'Correcting', 'Verifying'],
 };
 
 let popup: HTMLElement | null = null;

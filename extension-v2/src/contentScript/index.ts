@@ -128,6 +128,7 @@ async function detect(el: Element): Promise<void> {
     config.enableTranslate,
     config.enableSynonyms,
     config.enableAnalyze,
+    config.enableLint,
   );
 
   if (!match) { clearTriggerState(); return; }

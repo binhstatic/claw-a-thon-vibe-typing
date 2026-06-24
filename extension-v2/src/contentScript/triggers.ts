@@ -1,4 +1,4 @@
-export type TriggerMode = 'translate' | 'synonyms' | 'analyze';
+export type TriggerMode = 'translate' | 'synonyms' | 'analyze' | 'lint';
 
 export interface TriggerMatch {
   fullMatch: string;
@@ -18,6 +18,7 @@ const TRIGGERS: Trigger[] = [
   { re: /@([^@\n]{2,500})\.$/, mode: 'translate' },
   { re: /!!([^!\n]{2,500})\.$/, mode: 'synonyms' },
   { re: /#([^#\n]{2,500})\.$/, mode: 'analyze' },
+  { re: /\/lint([^/\n]{2,1000})\/$/, mode: 'lint' },
 ];
 
 export function matchTrigger(
@@ -26,11 +27,13 @@ export function matchTrigger(
   enableTranslate: boolean,
   enableSynonyms: boolean,
   enableAnalyze: boolean,
+  enableLint: boolean,
 ): TriggerMatch | null {
   const enabled: Record<TriggerMode, boolean> = {
     translate: enableTranslate,
     synonyms: enableSynonyms,
     analyze: enableAnalyze,
+    lint: enableLint,
   };
 
   for (const { re, mode } of TRIGGERS) {

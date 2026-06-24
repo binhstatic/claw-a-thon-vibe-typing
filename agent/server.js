@@ -89,6 +89,10 @@ const MASKS = {
     analyzeStyle:
       'STYLE: Academic register. Include formal grammar labels (e.g. "transitive verb", "nominalization"), ' +
       'scholarly collocations, and research-writing contexts.',
+    lintStyle:
+      'REGISTER: Academic English. Ensure correct use of formal grammar, proper article usage, ' +
+      'subject-verb agreement, and appropriate academic verb tenses (present perfect, past simple). ' +
+      'AVOID over-correcting or changing the author\'s voice — only fix what is grammatically wrong.',
   },
   office: {
     system:
@@ -106,6 +110,10 @@ const MASKS = {
     analyzeStyle:
       'STYLE: Business/professional register. Highlight formality level, politeness markers, ' +
       'and common business-email usage patterns.',
+    lintStyle:
+      'REGISTER: Professional business English. Fix grammar errors, punctuation, and word choice ' +
+      'that would look unprofessional in emails or reports. ' +
+      'AVOID restructuring sentences — only correct grammar and usage errors.',
   },
   writer: {
     system:
@@ -123,6 +131,10 @@ const MASKS = {
     analyzeStyle:
       'STYLE: Literary analysis. Cover connotations, emotional resonance, imagery potential, ' +
       'and how the word functions in creative/poetic contexts.',
+    lintStyle:
+      'REGISTER: Creative/literary writing. Preserve the author\'s stylistic choices and voice. ' +
+      'Fix only clear grammatical errors (wrong tense, missing agreement, broken syntax). ' +
+      'NEVER change intentional fragments, dashes, or unconventional punctuation used for effect.',
   },
   learner: {
     system:
@@ -140,6 +152,10 @@ const MASKS = {
     analyzeStyle:
       'STYLE: Learner-friendly explanations. Include simple grammar tips, example sentences ' +
       'for common patterns, and memory aids (mnemonics, visual associations).',
+    lintStyle:
+      'REGISTER: Learner English. Fix the most important grammar errors first (tense, articles, plurals). ' +
+      'Keep corrections simple and explain them in plain Vietnamese so the learner understands the rule. ' +
+      'AVOID changing too much at once — pick the 1-2 most impactful fixes per suggestion.',
   },
   chat: {
     system:
@@ -157,6 +173,10 @@ const MASKS = {
     analyzeStyle:
       'STYLE: Casual everyday language. Cover informal usage, common slang, internet culture references, ' +
       'and emoji-compatible expressions. Keep explanations short and friendly.',
+    lintStyle:
+      'REGISTER: Casual chat/texting. Only flag errors that make the message confusing or unnatural. ' +
+      'Intentional abbreviations, slang, and dropped punctuation are fine — do not correct them. ' +
+      'Focus on wrong word forms, confused homophones (their/there), or broken grammar.',
   },
   dev: {
     system:
@@ -174,6 +194,11 @@ const MASKS = {
     analyzeStyle:
       'STYLE: Technical documentation. Focus on formal definitions, precise usage in specs/APIs/READMEs, ' +
       'and common developer community usage.',
+    lintStyle:
+      'REGISTER: Technical documentation. Fix grammar errors that reduce clarity or precision in docs/comments. ' +
+      'Pay special attention to: missing articles before technical nouns, incorrect plurals, ' +
+      'dangling modifiers, and ambiguous pronoun references. ' +
+      'AVOID rewording — keep technical terms exactly as written.',
   },
 };
 
@@ -214,6 +239,25 @@ function buildPrompt(mode, phrase, context, mask) {
       `Word: "${phrase}"\n` +
       `\nReturn exactly 4 objects:\n` +
       `[{"phrase":"<entry>","breakdown":"<grammatical label>","meaning":"<Vietnamese explanation>"},...]`
+    );
+  }
+  if (mode === 'lint') {
+    return (
+      `${m.system}\n\n` +
+      `You are a grammar checker. Check the English sentence below for grammatical errors.\n` +
+      `${m.lintStyle}\n\n` +
+      `RULES:\n` +
+      `- Make the MINIMUM number of changes necessary to fix grammar errors.\n` +
+      `- Do NOT rephrase, restructure, or change the meaning of the sentence.\n` +
+      `- Do NOT change vocabulary unless a word is grammatically wrong (e.g. wrong verb form).\n` +
+      `- Preserve the author's word choices, tone, and sentence structure as much as possible.\n` +
+      `- If the sentence is already correct, return a single entry with the original sentence unchanged.\n\n` +
+      `Sentence to check: "${phrase}"\n\n` +
+      `Return 1 to 3 objects. Each object is one corrected version (from minimal fix to slightly more polished).\n` +
+      `- "phrase": the corrected sentence (full sentence, not just the changed part)\n` +
+      `- "breakdown": a SHORT comma-separated list of error types fixed (e.g. "Subject-verb agreement, Missing article"). Write "No errors found" if the sentence is correct.\n` +
+      `- "meaning": explanation in Vietnamese of WHAT was changed and WHY (1-2 sentences per fix). If no errors, explain why the sentence is already correct.\n\n` +
+      `[{"phrase":"<corrected sentence>","breakdown":"<error types fixed>","meaning":"<Vietnamese explanation>"},...]`
     );
   }
   throw new Error(`Unknown mode: ${mode}`);
