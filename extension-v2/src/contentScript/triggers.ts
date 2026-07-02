@@ -18,7 +18,7 @@ const TRIGGERS: Trigger[] = [
   { re: /@([^@\n]{2,500})\.$/, mode: 'translate' },
   { re: /!!([^!\n]{2,500})\.$/, mode: 'synonyms' },
   { re: /#([^#\n]{2,500})\.$/, mode: 'analyze' },
-  { re: /\/lint([^/\n]{2,1000})\/$/, mode: 'lint' },
+  { re: /\?\?([^?\n]{2,1000})\.$/, mode: 'lint' },
 ];
 
 export function matchTrigger(

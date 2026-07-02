@@ -1,4 +1,4 @@
-import { D as DEFAULT_CONFIG } from "./protocol-D7dFRlSf.js";
+import { D as DEFAULT_CONFIG } from "./protocol-BvvgTOsg.js";
 const KEY_CONFIG = "config";
 const KEY_DEFAULT_ENABLED = "defaultEnabled";
 const DOMAIN_PREFIX = "domain:";
@@ -83,4 +83,4 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
     chrome.storage.local.set({ installedOn: (/* @__PURE__ */ new Date()).toISOString() });
   }
 });
-//# sourceMappingURL=index.ts-DK3hpe4z.js.map
+//# sourceMappingURL=index.ts-DDp5HUYz.js.map

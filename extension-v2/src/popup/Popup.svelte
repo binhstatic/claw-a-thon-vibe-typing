@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { ProtocolClient } from '../ProtocolClient';
-  import { MASKS } from '../protocol';
-  import type { MaskId } from '../protocol';
+  import { MASKS, MODELS, DEFAULT_CONFIG } from '../protocol';
+  import type { MaskId, ModelId } from '../protocol';
 
   let domain = $state('');
   let enabled = $state(true);
   let agentStatus = $state<'checking' | 'online' | 'offline'>('checking');
   let selectedMask = $state<MaskId>('academic');
+  let selectedModel = $state<ModelId>(DEFAULT_CONFIG.model);
 
   async function getCurrentDomain(): Promise<string> {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -35,6 +36,11 @@
     await ProtocolClient.setConfig({ mask: id });
   }
 
+  async function selectModel(id: ModelId): Promise<void> {
+    selectedModel = id;
+    await ProtocolClient.setConfig({ model: id });
+  }
+
   function openOptions(): void {
     ProtocolClient.openOptions();
     window.close();
@@ -48,6 +54,7 @@
     ]);
     enabled = status;
     selectedMask = cfg.mask ?? 'academic';
+    selectedModel = cfg.model ?? DEFAULT_CONFIG.model;
     checkHealth(cfg.agentBaseUrl);
   });
 </script>
@@ -110,6 +117,30 @@
     {/each}
   </div>
 
+  <!-- Model selector -->
+  <div class="px-3 py-3 border-b border-gray-100">
+    <div class="text-[10.5px] font-bold text-gray-400 uppercase tracking-wide mb-2">Model AI</div>
+    <div class="grid grid-cols-4 gap-1.5">
+      {#each MODELS as model}
+        <button
+          onclick={() => selectModel(model.id)}
+          title={model.description}
+          class="mask-btn flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg border transition-all cursor-pointer"
+          class:mask-active={selectedModel === model.id}
+          class:mask-inactive={selectedModel !== model.id}
+        >
+          <span class="text-[18px] leading-none">{model.icon}</span>
+          <span class="text-[10px] font-medium leading-tight">{model.label}</span>
+        </button>
+      {/each}
+    </div>
+    {#each MODELS as model}
+      {#if selectedModel === model.id}
+        <p class="mt-1.5 text-[10.5px] text-indigo-600 font-medium text-center">{model.description}</p>
+      {/if}
+    {/each}
+  </div>
+
   <!-- Trigger guide -->
   <div class="px-4 py-3 border-b border-gray-100">
     <div class="text-[10.5px] font-bold text-gray-400 uppercase tracking-wide mb-2.5">Cách sử dụng</div>
@@ -127,8 +158,8 @@
         <span class="text-[12.5px] text-gray-700 leading-snug">Gõ <em class="text-violet-700 not-italic font-medium">#[từ].</em> → <em class="text-violet-700 not-italic font-medium">phân tích từ</em></span>
       </div>
       <div class="flex items-start gap-2.5">
-        <span class="shrink-0 bg-violet-100 text-violet-800 font-mono text-[12px] font-bold px-2 py-0.5 rounded min-w-[36px] text-center">/lint</span>
-        <span class="text-[12.5px] text-gray-700 leading-snug">Gõ <em class="text-violet-700 not-italic font-medium">/lint[câu văn]/</em> → <em class="text-violet-700 not-italic font-medium">kiểm tra ngữ pháp</em></span>
+        <span class="shrink-0 bg-violet-100 text-violet-800 font-mono text-[12px] font-bold px-2 py-0.5 rounded min-w-[36px] text-center">??</span>
+        <span class="text-[12.5px] text-gray-700 leading-snug">Gõ <em class="text-violet-700 not-italic font-medium">??[câu văn].</em> → <em class="text-violet-700 not-italic font-medium">kiểm tra ngữ pháp</em></span>
       </div>
     </div>
   </div>

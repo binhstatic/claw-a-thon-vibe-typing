@@ -3,15 +3,17 @@ var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { en
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 import { P as ProtocolClient } from "./ProtocolClient-CGKQZBsb.js";
 const TRIGGERS = [
-  { re: /@([^@\n]{2,80})\.$/, mode: "translate" },
-  { re: /!!([^!\n]{2,80})\.$/, mode: "synonyms" },
-  { re: /#([^#\n]{2,60})\.$/, mode: "analyze" }
+  { re: /@([^@\n]{2,500})\.$/, mode: "translate" },
+  { re: /!!([^!\n]{2,500})\.$/, mode: "synonyms" },
+  { re: /#([^#\n]{2,500})\.$/, mode: "analyze" },
+  { re: /\?\?([^?\n]{2,1000})\.$/, mode: "lint" }
 ];
-function matchTrigger(text, isCE, enableTranslate, enableSynonyms, enableAnalyze) {
+function matchTrigger(text, isCE, enableTranslate, enableSynonyms, enableAnalyze, enableLint) {
   const enabled = {
     translate: enableTranslate,
     synonyms: enableSynonyms,
-    analyze: enableAnalyze
+    analyze: enableAnalyze,
+    lint: enableLint
   };
   for (const { re, mode } of TRIGGERS) {
     if (!enabled[mode]) continue;
@@ -74,11 +76,11 @@ function offsetToRange(root, start, end) {
   range.setEnd(endPos.node, endPos.offset);
   return range;
 }
-async function callAgent(baseUrl, mode, phrase, context, mask, signal) {
+async function callAgent(baseUrl, mode, phrase, context, mask, model, signal) {
   const res = await fetch(`${baseUrl}/suggest`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mode, phrase, context, mask }),
+    body: JSON.stringify({ mode, phrase, context, mask, model }),
     signal
   });
   if (!res.ok) throw new Error(`Agent HTTP ${res.status}`);
@@ -236,12 +238,14 @@ class HighlightRenderer {
 const MODE_LABELS = {
   translate: "🌐 Gợi ý tiếng Anh",
   synonyms: "🔁 Từ đồng nghĩa",
-  analyze: "🔬 Phân tích từ"
+  analyze: "🔬 Phân tích từ",
+  lint: "✅ Kiểm tra ngữ pháp"
 };
 const LOADING_WORDS = {
   translate: ["Translating", "Interpreting", "Rephrasing", "Contextualizing", "Rendering", "Searching", "Expressing", "Converting"],
   synonyms: ["Searching", "Exploring", "Scanning", "Sifting", "Gathering", "Browsing", "Hunting", "Discovering"],
-  analyze: ["Analyzing", "Dissecting", "Examining", "Parsing", "Unpacking", "Investigating", "Studying", "Exploring"]
+  analyze: ["Analyzing", "Dissecting", "Examining", "Parsing", "Unpacking", "Investigating", "Studying", "Exploring"],
+  lint: ["Checking", "Proofreading", "Reviewing", "Scanning", "Validating", "Inspecting", "Correcting", "Verifying"]
 };
 let popup = null;
 let loadingPopup = null;
@@ -623,7 +627,8 @@ async function detect(el) {
     isCEElement(el),
     config.enableTranslate,
     config.enableSynonyms,
-    config.enableAnalyze
+    config.enableAnalyze,
+    config.enableLint
   );
   if (!match) {
     clearTriggerState();
@@ -648,6 +653,7 @@ async function detect(el) {
       match.phrase,
       match.context,
       config.mask ?? "academic",
+      config.model ?? "google/gemma-4-31b-it",
       signal
     );
     if (signal.aborted) return;
@@ -702,4 +708,4 @@ function attachListeners() {
   }, { passive: true, capture: true });
 }
 init().catch(console.error);
-//# sourceMappingURL=index.ts-CslQgIda.js.map
+//# sourceMappingURL=index.ts-CeVxFBK6.js.map

@@ -164,6 +164,7 @@ async function detect(el: Element): Promise<void> {
       match.phrase,
       match.context,
       config.mask ?? 'academic',
+      config.model ?? 'google/gemma-4-31b-it',
       signal,
     );
     if (signal.aborted) return;

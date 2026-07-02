@@ -147,10 +147,10 @@
 
         <label class="flex items-center justify-between cursor-pointer">
           <div class="flex items-center gap-3">
-            <span class="bg-violet-100 text-violet-800 font-mono text-xs font-bold px-2 py-0.5 rounded min-w-[36px] text-center">/lint</span>
+            <span class="bg-violet-100 text-violet-800 font-mono text-xs font-bold px-2 py-0.5 rounded min-w-[36px] text-center">??</span>
             <div>
               <div class="font-medium text-gray-700">Lint</div>
-              <div class="text-xs text-gray-400">/lint[câu văn]/ → kiểm tra ngữ pháp & chính tả</div>
+              <div class="text-xs text-gray-400">??[câu văn]. → kiểm tra ngữ pháp & chính tả</div>
             </div>
           </div>
           <input type="checkbox" bind:checked={enableLint} class="w-4 h-4 accent-indigo-600 cursor-pointer" />

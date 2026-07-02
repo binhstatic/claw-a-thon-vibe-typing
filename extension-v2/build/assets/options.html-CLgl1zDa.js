@@ -1,4 +1,4 @@
-import { l as listen_to_event_and_reset_event, c as current_batch, t as tick, u as untrack, r as render_effect, d as delegate, s as state, p as proxy, o as onMount, i as if_block, a as template_effect, g as get, b as delegated, e as append, f as pop, h as sibling, j as from_html, k as push, m as child, n as set_text, q as set, v as each, w as setupTheme, x as mount } from "./theme-B3OQhyhs.js";
+import { l as listen_to_event_and_reset_event, c as current_batch, t as tick, u as untrack, r as render_effect, d as delegate, s as state, p as proxy, o as onMount, i as if_block, a as template_effect, g as get, b as delegated, e as append, f as pop, h as sibling, j as from_html, k as push, m as child, n as set_text, q as set, v as each, w as setupTheme, x as mount } from "./theme-D14rce3a.js";
 import { P as ProtocolClient } from "./ProtocolClient-CGKQZBsb.js";
 function bind_value(input, get2, set2 = get2) {
   var batches = /* @__PURE__ */ new WeakSet();
@@ -91,13 +91,14 @@ var root_1 = from_html(`<span class="text-red-500 text-xs font-semibold">✗ Kh�
 var root_2 = from_html(`<li class="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg"><span class="font-mono text-xs text-gray-700"> </span> <button class="text-gray-400 hover:text-red-500 transition-colors text-sm leading-none cursor-pointer" title="Xóa override">✕</button></li>`);
 var root_3 = from_html(`<section class="bg-white rounded-xl border border-gray-200 p-5 mb-4 shadow-sm"><h2 class="text-[10.5px] font-bold text-gray-400 uppercase tracking-wide mb-4"> </h2> <ul class="flex flex-col gap-1.5"></ul></section>`);
 var root_4 = from_html(`<span class="text-green-600 text-sm font-medium">✓ Đã lưu</span>`);
-var root_5 = from_html(`<div class="min-h-screen bg-gray-50 font-sans text-[13px] text-gray-800 p-6"><div class="max-w-2xl mx-auto"><div class="mb-6"><h1 class="text-xl font-bold text-gray-900">🔤 Vibe Typing — Cài đặt</h1> <p class="text-sm text-gray-500 mt-0.5">Cấu hình AI translation extension</p></div> <section class="bg-white rounded-xl border border-gray-200 p-5 mb-4 shadow-sm"><h2 class="text-[10.5px] font-bold text-gray-400 uppercase tracking-wide mb-4">Agent API</h2> <div class="mb-3"><label class="block text-xs font-medium text-gray-600 mb-1" for="api-url">API Base URL</label> <input id="api-url" type="url" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent" placeholder="https://..."/></div> <div class="flex items-center gap-3"><button class="px-4 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60 cursor-pointer"> </button> <!></div></section> <section class="bg-white rounded-xl border border-gray-200 p-5 mb-4 shadow-sm"><h2 class="text-[10.5px] font-bold text-gray-400 uppercase tracking-wide mb-4">Triggers</h2> <div class="flex flex-col gap-4"><label class="flex items-center justify-between cursor-pointer"><div class="flex items-center gap-3"><span class="bg-violet-100 text-violet-800 font-mono text-xs font-bold px-2 py-0.5 rounded min-w-[36px] text-center">@</span> <div><div class="font-medium text-gray-700">Translate</div> <div class="text-xs text-gray-400">@[tiếng Việt]. → gợi ý tiếng Anh theo ngữ cảnh</div></div></div> <input type="checkbox" class="w-4 h-4 accent-indigo-600 cursor-pointer"/></label> <label class="flex items-center justify-between cursor-pointer"><div class="flex items-center gap-3"><span class="bg-violet-100 text-violet-800 font-mono text-xs font-bold px-2 py-0.5 rounded min-w-[36px] text-center">!!</span> <div><div class="font-medium text-gray-700">Synonyms</div> <div class="text-xs text-gray-400">!![từ EN]. → từ đồng nghĩa</div></div></div> <input type="checkbox" class="w-4 h-4 accent-indigo-600 cursor-pointer"/></label> <label class="flex items-center justify-between cursor-pointer"><div class="flex items-center gap-3"><span class="bg-violet-100 text-violet-800 font-mono text-xs font-bold px-2 py-0.5 rounded min-w-[36px] text-center">#</span> <div><div class="font-medium text-gray-700">Analyze</div> <div class="text-xs text-gray-400">#[từ vựng]. → phân tích chi tiết</div></div></div> <input type="checkbox" class="w-4 h-4 accent-indigo-600 cursor-pointer"/></label></div></section> <section class="bg-white rounded-xl border border-gray-200 p-5 mb-4 shadow-sm"><h2 class="text-[10.5px] font-bold text-gray-400 uppercase tracking-wide mb-4">Mặc định</h2> <label class="flex items-center justify-between cursor-pointer"><div><div class="font-medium text-gray-700">Bật trên tất cả trang</div> <div class="text-xs text-gray-400 mt-0.5">Khi tắt, chỉ hoạt động trên trang được bật thủ công qua popup</div></div> <input type="checkbox" class="w-4 h-4 accent-indigo-600 cursor-pointer"/></label></section> <!> <div class="flex items-center justify-end gap-3"><!> <button class="px-6 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60 cursor-pointer"> </button></div></div></div>`);
+var root_5 = from_html(`<div class="min-h-screen bg-gray-50 font-sans text-[13px] text-gray-800 p-6"><div class="max-w-2xl mx-auto"><div class="mb-6"><h1 class="text-xl font-bold text-gray-900">🔤 Vibe Typing — Cài đặt</h1> <p class="text-sm text-gray-500 mt-0.5">Cấu hình AI translation extension</p></div> <section class="bg-white rounded-xl border border-gray-200 p-5 mb-4 shadow-sm"><h2 class="text-[10.5px] font-bold text-gray-400 uppercase tracking-wide mb-4">Agent API</h2> <div class="mb-3"><label class="block text-xs font-medium text-gray-600 mb-1" for="api-url">API Base URL</label> <input id="api-url" type="url" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent" placeholder="https://..."/></div> <div class="flex items-center gap-3"><button class="px-4 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60 cursor-pointer"> </button> <!></div></section> <section class="bg-white rounded-xl border border-gray-200 p-5 mb-4 shadow-sm"><h2 class="text-[10.5px] font-bold text-gray-400 uppercase tracking-wide mb-4">Triggers</h2> <div class="flex flex-col gap-4"><label class="flex items-center justify-between cursor-pointer"><div class="flex items-center gap-3"><span class="bg-violet-100 text-violet-800 font-mono text-xs font-bold px-2 py-0.5 rounded min-w-[36px] text-center">@</span> <div><div class="font-medium text-gray-700">Translate</div> <div class="text-xs text-gray-400">@[tiếng Việt]. → gợi ý tiếng Anh theo ngữ cảnh</div></div></div> <input type="checkbox" class="w-4 h-4 accent-indigo-600 cursor-pointer"/></label> <label class="flex items-center justify-between cursor-pointer"><div class="flex items-center gap-3"><span class="bg-violet-100 text-violet-800 font-mono text-xs font-bold px-2 py-0.5 rounded min-w-[36px] text-center">!!</span> <div><div class="font-medium text-gray-700">Synonyms</div> <div class="text-xs text-gray-400">!![từ EN]. → từ đồng nghĩa</div></div></div> <input type="checkbox" class="w-4 h-4 accent-indigo-600 cursor-pointer"/></label> <label class="flex items-center justify-between cursor-pointer"><div class="flex items-center gap-3"><span class="bg-violet-100 text-violet-800 font-mono text-xs font-bold px-2 py-0.5 rounded min-w-[36px] text-center">#</span> <div><div class="font-medium text-gray-700">Analyze</div> <div class="text-xs text-gray-400">#[từ vựng]. → phân tích chi tiết</div></div></div> <input type="checkbox" class="w-4 h-4 accent-indigo-600 cursor-pointer"/></label> <label class="flex items-center justify-between cursor-pointer"><div class="flex items-center gap-3"><span class="bg-violet-100 text-violet-800 font-mono text-xs font-bold px-2 py-0.5 rounded min-w-[36px] text-center">??</span> <div><div class="font-medium text-gray-700">Lint</div> <div class="text-xs text-gray-400">??[câu văn]. → kiểm tra ngữ pháp & chính tả</div></div></div> <input type="checkbox" class="w-4 h-4 accent-indigo-600 cursor-pointer"/></label></div></section> <section class="bg-white rounded-xl border border-gray-200 p-5 mb-4 shadow-sm"><h2 class="text-[10.5px] font-bold text-gray-400 uppercase tracking-wide mb-4">Mặc định</h2> <label class="flex items-center justify-between cursor-pointer"><div><div class="font-medium text-gray-700">Bật trên tất cả trang</div> <div class="text-xs text-gray-400 mt-0.5">Khi tắt, chỉ hoạt động trên trang được bật thủ công qua popup</div></div> <input type="checkbox" class="w-4 h-4 accent-indigo-600 cursor-pointer"/></label></section> <!> <div class="flex items-center justify-end gap-3"><!> <button class="px-6 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60 cursor-pointer"> </button></div></div></div>`);
 function Options($$anchor, $$props) {
   push($$props, true);
   let agentBaseUrl = state("");
   let enableTranslate = state(true);
   let enableSynonyms = state(true);
   let enableAnalyze = state(true);
+  let enableLint = state(true);
   let defaultEnabled = state(true);
   let domains = state(proxy([]));
   let testStatus = state("idle");
@@ -112,6 +113,7 @@ function Options($$anchor, $$props) {
     set(enableTranslate, cfg.enableTranslate, true);
     set(enableSynonyms, cfg.enableSynonyms, true);
     set(enableAnalyze, cfg.enableAnalyze, true);
+    set(enableLint, cfg.enableLint, true);
     set(defaultEnabled, def, true);
     set(domains, doms, true);
   }
@@ -121,7 +123,8 @@ function Options($$anchor, $$props) {
       agentBaseUrl: get(agentBaseUrl),
       enableTranslate: get(enableTranslate),
       enableSynonyms: get(enableSynonyms),
-      enableAnalyze: get(enableAnalyze)
+      enableAnalyze: get(enableAnalyze),
+      enableLint: get(enableLint)
     };
     await Promise.all([
       ProtocolClient.setConfig(cfg),
@@ -176,9 +179,11 @@ function Options($$anchor, $$props) {
   var input_2 = sibling(child(label_1), 2);
   var label_2 = sibling(label_1, 2);
   var input_3 = sibling(child(label_2), 2);
-  var section_2 = sibling(section_1, 2);
-  var label_3 = sibling(child(section_2), 2);
+  var label_3 = sibling(label_2, 2);
   var input_4 = sibling(child(label_3), 2);
+  var section_2 = sibling(section_1, 2);
+  var label_4 = sibling(child(section_2), 2);
+  var input_5 = sibling(child(label_4), 2);
   var node_1 = sibling(section_2, 2);
   {
     var consequent_2 = ($$anchor2) => {
@@ -226,7 +231,8 @@ function Options($$anchor, $$props) {
   bind_checked(input_1, () => get(enableTranslate), ($$value) => set(enableTranslate, $$value));
   bind_checked(input_2, () => get(enableSynonyms), ($$value) => set(enableSynonyms, $$value));
   bind_checked(input_3, () => get(enableAnalyze), ($$value) => set(enableAnalyze, $$value));
-  bind_checked(input_4, () => get(defaultEnabled), ($$value) => set(defaultEnabled, $$value));
+  bind_checked(input_4, () => get(enableLint), ($$value) => set(enableLint, $$value));
+  bind_checked(input_5, () => get(defaultEnabled), ($$value) => set(defaultEnabled, $$value));
   delegated("click", button_2, save);
   append($$anchor, div);
   pop();
@@ -234,4 +240,4 @@ function Options($$anchor, $$props) {
 delegate(["click"]);
 setupTheme();
 mount(Options, { target: document.getElementById("app") });
-//# sourceMappingURL=options.html-BrpKH3X-.js.map
+//# sourceMappingURL=options.html-CLgl1zDa.js.map

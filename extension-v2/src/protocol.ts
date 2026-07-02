@@ -16,6 +16,27 @@ export const MASKS: MaskDef[] = [
   { id: 'dev',      icon: '👨‍💻', label: 'Lập trình',  description: 'Docs, code comment, kỹ thuật' },
 ];
 
+export type ModelId =
+  | 'google/gemma-4-31b-it'
+  | 'minimax/minimax-m2.5'
+  | 'qwen/qwen3-5-27b'
+  | 'openai/gpt-4o';
+
+export interface ModelDef {
+  id: ModelId;
+  label: string;
+  icon: string;
+  description: string;
+}
+
+// Must stay in sync with MODEL_CONFIGS in agent/server.js
+export const MODELS: ModelDef[] = [
+  { id: 'google/gemma-4-31b-it', icon: '💎', label: 'Gemma 4',    description: 'Google Gemma 4 31B — mặc định, cân bằng' },
+  { id: 'minimax/minimax-m2.5',  icon: '⚡', label: 'MiniMax',    description: 'MiniMax M2.5 — phản hồi nhanh' },
+  { id: 'qwen/qwen3-5-27b',      icon: '🧠', label: 'Qwen3.5',    description: 'Qwen3.5 27B — mạnh về đa ngôn ngữ' },
+  { id: 'openai/gpt-4o',         icon: '🤖', label: 'GPT-4o',     description: 'OpenAI GPT-4o — chất lượng cao' },
+];
+
 export interface Config {
   agentBaseUrl: string;
   enableTranslate: boolean;
@@ -23,6 +44,7 @@ export interface Config {
   enableAnalyze: boolean;
   enableLint: boolean;
   mask: MaskId;
+  model: ModelId;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -33,6 +55,7 @@ export const DEFAULT_CONFIG: Config = {
   enableAnalyze: true,
   enableLint: true,
   mask: 'academic',
+  model: 'google/gemma-4-31b-it',
 };
 
 export type Request =

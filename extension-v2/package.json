@@ -1,6 +1,6 @@
 {
   "name": "vibe-typing",
-  "version": "2",
+  "version": "0.3.3",
   "type": "module",
   "scripts": {
     "prepare": "cp -r ../extension/icons public/ 2>/dev/null || true",

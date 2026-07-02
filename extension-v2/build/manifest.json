@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Vibe Typing — Smart Translator",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "AI-powered translation and vocabulary suggestions while you type.",
   "permissions": [
     "storage",
@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/index.ts-loader-DtJkynT7.js"
+        "assets/index.ts-loader-DAxNng94.js"
       ],
       "matches": [
         "<all_urls>"
@@ -52,8 +52,8 @@
       "resources": [
         "assets/ProtocolClient-CGKQZBsb.js",
         "assets/ProtocolClient-CGKQZBsb.js.map",
-        "assets/index.ts-CslQgIda.js",
-        "assets/index.ts-CslQgIda.js.map"
+        "assets/index.ts-CeVxFBK6.js",
+        "assets/index.ts-CeVxFBK6.js.map"
       ],
       "use_dynamic_url": false
     }
