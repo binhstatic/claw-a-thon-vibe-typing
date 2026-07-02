@@ -18,6 +18,35 @@ if (!API_KEY) {
 const { hostname: LLM_HOST, pathname } = new URL(LLM_BASE);
 const LLM_PATH = pathname.replace(/\/$/, '');
 
+// ─── MODEL CONFIGURATION ──────────────────────────────────────────────────────
+const MODEL_CONFIGS = {
+  'google/gemma-4-31b-it': {
+    maxTokensParam: 'max_completion_tokens',
+    maxTokens: 4096,
+    temperature: 1,
+  },
+  'minimax/minimax-m2.5': {
+    maxTokensParam: 'max_tokens',
+    maxTokens: 2000,
+    temperature: 1,
+    topP: 0.95,
+    presencePenalty: 0,
+  },
+  'qwen/qwen3-5-27b': {
+    maxTokensParam: 'max_tokens',
+    maxTokens: 4096,
+    temperature: 1,
+    topP: 0.95,
+  },
+  'openai/gpt-4o': {
+    maxTokensParam: 'max_tokens',
+    maxTokens: 2000,
+    temperature: 0.2,
+    topP: 0.7,
+    presencePenalty: 0,
+  },
+};
+
 // ─── EXPRESS APP ──────────────────────────────────────────────────────────────
 const app = express();
 app.use(express.json());
@@ -31,14 +60,22 @@ app.use((req, res, next) => {
 });
 
 // ─── DIRECT LLM CALL ─────────────────────────────────────────────────────────
-function callLLM(prompt) {
+function callLLM(prompt, model) {
   return new Promise((resolve, reject) => {
-    const body = Buffer.from(JSON.stringify({
-      model:       LLM_MODEL,
-      messages:    [{ role: 'user', content: prompt }],
-      temperature: 0.7,
-      max_tokens:  20000,
-    }));
+    const modelName = model || LLM_MODEL;
+    const config = MODEL_CONFIGS[modelName] || MODEL_CONFIGS['google/gemma-4-31b-it'];
+
+    const payload = {
+      model: modelName,
+      messages: [{ role: 'user', content: prompt }],
+      [config.maxTokensParam]: config.maxTokens,
+    };
+
+    if (config.temperature !== undefined) payload.temperature = config.temperature;
+    if (config.topP !== undefined) payload.top_p = config.topP;
+    if (config.presencePenalty !== undefined) payload.presence_penalty = config.presencePenalty;
+
+    const body = Buffer.from(JSON.stringify(payload));
 
     const req = https.request({
       hostname: LLM_HOST,
@@ -265,10 +302,12 @@ function buildPrompt(mode, phrase, context, mask) {
 
 // ─── JSON EXTRACTOR ───────────────────────────────────────────────────────────
 function extractJSON(raw) {
-  const start = raw.indexOf('[');
-  const end   = raw.lastIndexOf(']');
+  // strip <think>...</think> reasoning blocks (gemma, qwen, deepseek)
+  const stripped = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  const start = stripped.indexOf('[');
+  const end   = stripped.lastIndexOf(']');
   if (start === -1 || end <= start) throw new Error('No JSON array in LLM response');
-  return JSON.parse(raw.slice(start, end + 1));
+  return JSON.parse(stripped.slice(start, end + 1));
 }
 
 // ─── ROUTES ───────────────────────────────────────────────────────────────────
@@ -277,7 +316,7 @@ app.get('/health', (_req, res) => {
 });
 
 app.post('/suggest', async (req, res) => {
-  const { mode, phrase, context = '', mask = 'academic' } = req.body;
+  const { mode, phrase, context = '', mask = 'academic', model } = req.body;
 
   if (!mode || !phrase) {
     return res.status(400).json({ error: '"mode" and "phrase" are required' });
@@ -291,7 +330,7 @@ app.post('/suggest', async (req, res) => {
   }
 
   try {
-    const raw         = await callLLM(prompt);
+    const raw         = await callLLM(prompt, model);
     const suggestions = extractJSON(raw);
     res.json({ suggestions });
   } catch (e) {
